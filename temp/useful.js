@@ -124,9 +124,10 @@ async function initializeTenent(userId,options){
     MFA : options.MFA,
     schema : options.schema,
     whiteListIps : options.whiteListIps,
+    ipRateLimit : options.ipRateLimit,
+    maxSession : options.maxSession,
     privateKey : encryptedPrivateKey,
-    publicKey,
-    userId
+    publicKey
   }
 
   const tenent = await createTenent(recordProperties);
