@@ -1,0 +1,11 @@
+{
+    "defaults" : {
+        "maxSession" : 15,
+        "ipRateLimit":100,
+        "mfaDefault" : false,
+        "ipWhiteListing" : false,
+        "storeLogins" : false,
+        "storeCreatedAt": false,
+        "storeUpdatedAt" : false
+    }
+}

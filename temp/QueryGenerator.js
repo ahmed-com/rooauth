@@ -25,7 +25,7 @@ class TenentQueryGenerator{
       this.extraLoginInsertionFields = {fields : '', values : ''};
     }
     
-    static createTenentTable(){
+    static createTenentTable(){ ///
       return `CREATE TABLE IF NOT EXISTS tenents (
         tenent_id INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
         subject_schema JSON NULL,
@@ -40,7 +40,7 @@ class TenentQueryGenerator{
     )ENGINE=${tenentsTableEngine};`;
     }
 
-    static createIpsTable(){
+    static createIpsTable(){ ///
         return `CREATE TABLE IF NOT EXISTS auth.ips(
             ip CHAR(39),
             tenent_id INTEGER UNSIGNED NOT NULL,
@@ -49,7 +49,7 @@ class TenentQueryGenerator{
         )ENGINE=${ipsTableEngine};`;
     }
 
-    static createClientsTable(){
+    static createClientsTable(){///
         return `CREATE TABLE IF NOT EXISTS clients(
             client_id INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
             client_secret VARCHAR(255) NOT NULL,
@@ -60,7 +60,7 @@ class TenentQueryGenerator{
         )ENGINE=${clientsTableEngine};`;
     }
   
-    createSubjectsTable(){
+    createSubjectsTable(){///
       return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}subjects (
         id INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
         account VARCHAR(255) NOT NULL UNIQUE,
@@ -76,7 +76,7 @@ class TenentQueryGenerator{
     ) ENGINE=${subjectsTableEngine};`;
     }
   
-    createSessionsTable(){
+    createSessionsTable(){///
         return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}tokens (
             jti INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
             sub INTEGER UNSIGNED NOT NULL,
@@ -88,7 +88,7 @@ class TenentQueryGenerator{
         )ENGINE=${sessionsTableEngine};`;
     }   
 
-    createLoginsTable(){
+    createLoginsTable(){///
         return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}logins (
             subject_id INTEGER UNSIGNED NOT NULL,
             jti INTEGER UNSIGNED NULL,
@@ -218,7 +218,7 @@ class TenentWithPhotoQueryGenerator extends TenentQueryGenerator{ // a decorator
         this.extraSubjectFields = tenentQueryGenerator.extraSubjectFields + 'photo VARCHAR(255) NULL,' ;
         this.extraSubjectInsertionFields = {
             fields : tenentQueryGenerator.extraSubjectInsertionFields.fields + 'photo,',
-            values : tenentQueryGenerator.extraSubjectInsertionFields.values + ':photo'
+            values : tenentQueryGenerator.extraSubjectInsertionFields.values + ':photo,'
         }
     }
 }
@@ -230,7 +230,7 @@ class TenentWithMFAQueryGenerator extends TenentQueryGenerator{ // a decorator c
         this.extraSubjectFields = tenentQueryGenerator.extraSubjectFields + 'mfa BOOLEAN NOT NULL,';
         this.extraSubjectInsertionFields = {
             fields : tenentQueryGenerator.extraSubjectInsertionFields.fields + 'mfa,',
-            values : tenentQueryGenerator.extraSubjectInsertionFields.values + ':mfa'
+            values : tenentQueryGenerator.extraSubjectInsertionFields.values + ':mfa,'
         }
     }
 }
