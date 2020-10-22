@@ -5,7 +5,6 @@ const loginsTableEngine = 'InnoDB';
 const tenentsTableEngine = 'InnoDB';
 const clientsTableEngine = 'InnoDB';
 const ipsTableEngine = 'InnoDB';
-const defaultMfaMethod = 'email';
 const extraTenentFields = '';
 const extraClientFields = '';
 const extraIpFields = '';
@@ -16,12 +15,14 @@ const defaultIpRateLimit = 100; // request per second
 
 class TenentQueryGenerator{
 
-    constructor (tenentId , mfaMethod = defaultMfaMethod){
+    constructor (tenentId){
       this.tenentId = tenentId;
       this.extraSubjectFields = '';
       this.extraSessionFields = '';
       this.extrasLoginFields = '';
-      this.mfaMethod = mfaMethod;
+      this.extraSubjectInsertionFields = {fields : '', values : ''};
+      this.extraSessionInsertionFields = {fields : '', values : ''};
+      this.extraLoginInsertionFields = {fields : '', values : ''};
     }
     
     static createTenentTable(){
@@ -62,11 +63,11 @@ class TenentQueryGenerator{
     createSubjectsTable(){
       return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}subjects (
         id INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
-        ${this.mfaMethod} VARCHAR(255) NOT NULL UNIQUE,
+        account VARCHAR(255) NOT NULL UNIQUE,
         password_hash VARCHAR(255) NOT NULL,
         old_password_hash VARCHAR(255) NULL,
         password_changed_at DATETIME NULL,
-        ${this.mfaMethod}_verified BOOLEAN NOT NULL,
+        account_verified BOOLEAN NOT NULL DEFAULT false,
         created_at DATETIME NOT NULL,
         updated_at DATETIME NULL,
         data JSON NULL,
@@ -80,6 +81,7 @@ class TenentQueryGenerator{
             jti INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
             sub INTEGER UNSIGNED NOT NULL,
             exp DATETIME NOT NULL,
+            verified BOOLEAN NOT NULL,
             ${this.extraSessionFields}
             PRIMARY KEY (jti),
             FOREIGN KEY (sub) REFERENCES tno${this.tenentId}subjects(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -101,7 +103,21 @@ class TenentQueryGenerator{
     }
 
     insertSubject(){
-        return ``;
+        return `INSERT INTO tno${this.tenentId}subjects (
+            id,
+            account,
+            password_hash,
+            created_at,
+            ${this.extraSubjectInsertionFields.fields}
+            data
+            ) VALUES (
+            DEFAULT,
+            :account,
+            :passwordHash,
+            :now,
+            ${this.extraSubjectInsertionFields.values}
+            :data
+            );`;
     }
 
     deleteSubject(){
@@ -200,6 +216,10 @@ class TenentWithPhotoQueryGenerator extends TenentQueryGenerator{ // a decorator
     constructor(tenentQueryGenerator){
         super(tenentQueryGenerator.tenentId);
         this.extraSubjectFields = tenentQueryGenerator.extraSubjectFields + 'photo VARCHAR(255) NULL,' ;
+        this.extraSubjectInsertionFields = {
+            fields : tenentQueryGenerator.extraSubjectInsertionFields.fields + 'photo,',
+            values : tenentQueryGenerator.extraSubjectInsertionFields.values + ':photo'
+        }
     }
 }
 
@@ -208,6 +228,9 @@ class TenentWithMFAQueryGenerator extends TenentQueryGenerator{ // a decorator c
     constructor(tenentQueryGenerator){
         super(tenentQueryGenerator.tenentId);
         this.extraSubjectFields = tenentQueryGenerator.extraSubjectFields + 'mfa BOOLEAN NOT NULL,';
-        this.extraSessionFields = tenentQueryGenerator.extraSessionFields + 'verified BOOLEAN NOT NULL,';
+        this.extraSubjectInsertionFields = {
+            fields : tenentQueryGenerator.extraSubjectInsertionFields.fields + 'mfa,',
+            values : tenentQueryGenerator.extraSubjectInsertionFields.values + ':mfa'
+        }
     }
 }
