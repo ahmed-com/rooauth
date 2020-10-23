@@ -102,6 +102,39 @@ class TenentQueryGenerator{
         )ENGINE=${loginsTableEngine};`;
     }
 
+    insertTenent(){
+        return `
+        INSERT INTO tenents (
+            tenent_id,
+            subject_schema,
+            mfa_enable_default,
+            mfa_method,
+            private_key,
+            public_key,
+            allow_ip_white_listing,
+            store_logins,
+            store_created_at,
+            store_updated_at,
+            max_session,
+            ${extraTenentInsertionFields.fields}
+            ip_rate_limit
+        ) VALUES (
+            DEFAULT,
+            :schema,
+            :mfaEnableDefault,
+            :mfaMethod,
+            :privateKey,
+            :publicKey,
+            :allowIpWhiteListing,
+            :storeLogins,
+            :storeCreatedAt,
+            :storeUpdatedAt,
+            :maxSession
+            ${extraTenentInsertionFields.values}
+            :ipRateLimit
+        );`;
+    }
+
     insertSubject(){
         return `INSERT INTO tno${this.tenentId}subjects (
             id,

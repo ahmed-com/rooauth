@@ -1,5 +1,5 @@
 import StorageEngine from "./StorageEnginesEnum";
-import InsertionField from "./InsertionFieldsInterface"
+import InsertionField from "./InsertionFieldsInterface"; // this approach is no longer needed and shall be removed after testing
 import config from "../config/config.json";
 
 
@@ -20,6 +20,9 @@ export default class TenentQG {
     static extraTenentFields:string = '';
     static extraClientFields:string = '';
     static extraIpFields:string = '';
+    static extraTenentInsertionFields:InsertionField = {fields : '' , values : ''};
+    static extraClientInsertionFields:InsertionField = {fields : '' , values : ''};
+    static extraIpInsertionFields:InsertionField = {fields : '' , values : ''};
 
     /**
      * making it possible to adjust the available sizes in the DB without missing with the queries
@@ -76,14 +79,15 @@ export default class TenentQG {
             store_created_at BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreCreatedAt},
             store_updated_at BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreUpdatedAt},
             max_session INTEGER NOT NULL DEFAULT ${TenentQG.defaultMaxSession},
+            ip_rate_limit INTEGER NOT NULL DEFAULT ${TenentQG.defaultIpRateLimit},
             ${TenentQG.extraTenentFields}
-            ip_rate_limit INTEGER NOT NULL DEFAULT ${TenentQG.defaultIpRateLimit}
+            PRIMARY KEY (tenent_id)
         )ENGINE=${TenentQG.tenentsTableEngine};`;
     }
 
     static createIpsTable():string{
-        return `CREATE TABLE IF NOT EXISTS auth.ips(
-            ip CHAR(39),
+        return `CREATE TABLE IF NOT EXISTS ips(
+            ip CHAR(39) NOT NULL,
             tenent_id INTEGER UNSIGNED NOT NULL,
             ${TenentQG.extraIpFields}
             FOREIGN KEY (tenent_id) REFERENCES tenents(tenent_id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -148,4 +152,30 @@ export default class TenentQG {
             FOREIGN KEY (jti) REFERENCES tno${this.tenentId}tokens(jti) ON DELETE SET NULL ON UPDATE CASCADE
         )ENGINE=${TenentQG.loginsTableEngine};`;
     }
+
+    /**
+     * @summary
+     *  {tenent_id?:number ,subject_schema?:JSON , mfa_enable_default?:boolean , mfa_method:MFA , private_key:string , public_key:string , allow_ip_white_listing?:boolean , store_logins?:boolean , store_created_at?:boolean , store_updated_at?:boolean , max_session?:number , ip_rate_limit?:number}
+     */
+    static insertTenent():string{
+        return "INSERT INTO tenents SET ?";
+    }
+
+    /**
+     * @summary
+     * {client_id?:number , client_secret:string , user_id:number , tenent_id:number}
+     */
+    static insertClient():string{
+        return "INSERT INTO clients SET ?";
+    }
+
+    /**
+     * @summary
+     * {ip:string , tenent_id:number}
+     */
+    static insertIp():string{
+        return "INSERT INTO ips SET ?"
+    }
+
+    
 }
