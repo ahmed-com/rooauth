@@ -177,5 +177,46 @@ export default class TenentQG {
         return "INSERT INTO ips SET ?"
     }
 
-    
+    /**
+     * @summary
+     * {id:number}
+     */
+    static getTenentById():string{
+        return "SELECT * FROM tenents WHERE tenent_id = :id";
+    }
+
+    /**
+     * @summary
+     * {limit?:number , offset?:number}
+     */
+    static getAllTenents(ignorePagination:boolean):string{
+        const pagination:string = ignorePagination ? "" : "LIMIT :limit OFFSET :offset";
+        return "SELECT * FROM tenents" + pagination;
+    }
+
+    /**
+     * @summary
+     * {id:number}
+     */
+    static getClientById():string{
+        return "SELECT * FROM clients WHERE client_id = :id";
+    }
+
+    /**
+     * @summary
+     * {tenentId:number , limit?:number , offset?:number}
+     */
+    static getClientsByTenent(ignorePagination:boolean):string{
+        const pagination:string = ignorePagination ? "" : "LIMIT :limit OFFSET :offset";
+        return "SELECT * FROM clients WHERE tenent_id = :tenentId" + pagination;
+    }
+
+    /**
+     * @summary
+     * {limit?:number , offset?:number}
+     */
+    static getIpWhiteList(ignorePagination:boolean):string{
+        const pagination:string = ignorePagination ? "" : "LIMIT :limit OFFSET :offset";
+        return "SELECT ip FROM ips WHERE tenent_id = :id" + pagination;
+    }
 }
