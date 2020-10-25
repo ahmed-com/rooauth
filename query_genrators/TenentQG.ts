@@ -1,5 +1,5 @@
 import StorageEngine from "./StorageEnginesEnum";
-import InsertionField from "./InsertionFieldsInterface"; // this approach is no longer needed and shall be removed after testing
+import InsertionField from "./InsertionFieldsInterface";
 import config from "../config/config.json";
 
 
@@ -103,40 +103,6 @@ export default class TenentQG {
             ${TenentQG.extraClientFields}
             FOREIGN KEY (tenent_id) REFERENCES tenents(tenent_id) ON DELETE CASCADE ON UPDATE CASCADE
         )ENGINE=${TenentQG.clientsTableEngine};`;
-    }
-
-    public createSubjectsTable():string{
-        return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}subjects (
-          id INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
-          account VARCHAR(255) NOT NULL UNIQUE,
-          password_hash VARCHAR(255) NOT NULL,
-          old_password_hash VARCHAR(255) NULL,
-          password_changed_at DATETIME NULL,
-          enable_mfa BOOLEAN NOT NULL,
-          account_verified BOOLEAN NOT NULL DEFAULT false,
-          ${this.extraSubjectFields}
-          PRIMARY KEY (id)
-      ) ENGINE=${TenentQG.subjectsTableEngine};`;
-    }
-
-    public enableMfaByDefault():string{
-        return `ALTER TABLE tno${this.tenentId}subjects ALTER enable_mfa SET DEFAULT true;`
-    }
-
-    public disableMfaByDefault():string{
-        return `ALTER TABLE tno${this.tenentId}subjects ALTER enable_mfa SET DEFAULT false;`
-    }
-
-    public createSessionsTable():string{
-        return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}tokens (
-            jti INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
-            sub INTEGER UNSIGNED NOT NULL,
-            exp DATETIME NOT NULL,
-            verified BOOLEAN NOT NULL DEFAULT false,
-            ${this.extraSessionFields}
-            PRIMARY KEY (jti),
-            FOREIGN KEY (sub) REFERENCES tno${this.tenentId}subjects(id) ON DELETE CASCADE ON UPDATE CASCADE
-        )ENGINE=${TenentQG.sessionsTableEngine};`;
     }
 
     public createLoginsTable():string{
