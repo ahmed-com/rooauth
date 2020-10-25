@@ -1,5 +1,5 @@
 import InsertionField from "./InsertionFieldsInterface";
-import StorageEngines from "./StorageEnginesEnum";
+import StorageEngine from "./StorageEngineEnum";
 
 export default class SubjectQG{
     
@@ -19,7 +19,7 @@ export default class SubjectQG{
         this.accountVerified_default = 'FALSE';
     }
 
-    public createTable(engine:StorageEngines):string{
+    public createTable(engine:StorageEngine):string{
         return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}subjects (
             id INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
             account VARCHAR(255) NOT NULL UNIQUE,

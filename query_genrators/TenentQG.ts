@@ -1,4 +1,4 @@
-import StorageEngine from "./StorageEnginesEnum";
+import StorageEngine from "./StorageEngineEnum";
 import InsertionField from "./InsertionFieldsInterface";
 import config from "../config/config.json";
 
@@ -103,20 +103,6 @@ export default class TenentQG {
             ${TenentQG.extraClientFields}
             FOREIGN KEY (tenent_id) REFERENCES tenents(tenent_id) ON DELETE CASCADE ON UPDATE CASCADE
         )ENGINE=${TenentQG.clientsTableEngine};`;
-    }
-
-    public createLoginsTable():string{
-        return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}logins (
-            subject_id INTEGER UNSIGNED NOT NULL,
-            jti INTEGER UNSIGNED NULL,
-            password_login BOOLEAN NULL,
-            client_id INTEGER UNSIGNED NOT NULL,
-            ip CHAR(39),
-            logged_at DATETIME NOT NULL,
-            device_info VARCHAR(255) NULL,
-            ${this.extrasLoginFields}
-            FOREIGN KEY (jti) REFERENCES tno${this.tenentId}tokens(jti) ON DELETE SET NULL ON UPDATE CASCADE
-        )ENGINE=${TenentQG.loginsTableEngine};`;
     }
 
     /**

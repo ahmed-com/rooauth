@@ -1,5 +1,5 @@
 import InsertionField from "./InsertionFieldsInterface";
-import StorageEngines from "./StorageEnginesEnum";
+import StorageEngine from "./StorageEngineEnum";
 
 export default class SessionQG{
 
@@ -7,11 +7,9 @@ export default class SessionQG{
         private tenentId:number,
         private extraInsertionFields:InsertionField,
         private extraFields:string
-    ){
-        
-    }
+    ){}
 
-    public createTable(engine:StorageEngines):string{
+    public createTable(engine:StorageEngine):string{
         return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}tokens (
             jti INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
             sub INTEGER UNSIGNED NOT NULL,
@@ -27,7 +25,8 @@ export default class SessionQG{
      * {sub:number,exp:date,verified?:boolean}
      */
     public insertSession():string{
-        return `INSERT INTO tno${this.tenentId}tokens(
+        return `
+        INSERT INTO tno${this.tenentId}tokens(
             jti,
             sub,
             ${this.extraInsertionFields.fields}
