@@ -35,7 +35,7 @@ export default class SubjectQG{
 
     /**
      * @summary
-     * {id?:number,account:string,passwordHash:string,oldPasswordHash?:string,passwordChangedAt?:date,enableMfa?:boolean,accountVerified:boolean}
+     * {account:string,passwordHash:string,oldPasswordHash?:string,passwordChangedAt?:date,enableMfa?:boolean,accountVerified:boolean}
      */
     public insertSubject():string{
         return `
@@ -79,7 +79,7 @@ export default class SubjectQG{
      * {id:number}
      */
     public selectSubjectById():string{
-        return `SELECT * FROM tno${this.tenentId}subjects WHERE id=:id`;
+        return `SELECT * FROM tno${this.tenentId}subjects WHERE id=:id LIMIT 1;`;
     }
 
     /**
@@ -87,6 +87,6 @@ export default class SubjectQG{
      * {account:string}
      */
     public selectSubjectsByAccount():string{
-        return `SELECT * FROM tno${this.tenentId}subjects WHERE account=:account`;
+        return `SELECT * FROM tno${this.tenentId}subjects WHERE account=:account LIMIT 1;`;
     }
 }
