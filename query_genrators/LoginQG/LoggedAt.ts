@@ -1,5 +1,6 @@
 import Field from '../Field';
 import LoginQG from './LoginQG';
+import { constructSelect } from '../utils';
 
 export default class LoggedAt extends LoginQG{
 
@@ -17,5 +18,25 @@ export default class LoggedAt extends LoginQG{
         
         this.fields = {...lQG.fields , decoratorField};
         this.readableFields = {...lQG.readableFields , decoratorField};
+
+        this.select = {
+            loginsAfterDate: this.selectLoginsAfterDate,
+            loginsBeforeDate: this.selectLoginsBeforeDate,
+            ...lQG.select
+        }
+    }
+
+    private selectLoginsAfterDate(ignorePagination?:boolean,...fields:Field[]):string{
+        const pagination:boolean = ignorePagination === undefined ? false : ignorePagination;
+        const condition:string = 'logged_at > :date';
+        const tableName:string = `tno${this.id}logins`;
+        return constructSelect(fields,tableName,condition,pagination);
+    }
+
+    private selectLoginsBeforeDate(ignorePagination?:boolean,...fields:Field[]):string{
+        const pagination:boolean = ignorePagination === undefined ? false : ignorePagination;
+        const condition:string = 'logged_at < :date';
+        const tableName:string = `tno${this.id}logins`;
+        return constructSelect(fields,tableName,condition,pagination);
     }
 }
