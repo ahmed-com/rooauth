@@ -48,6 +48,12 @@ export default class TokenQG{
 
         this.select = {
 
+            all : (ignorePagination:boolean,...fields:Field[]):string=>{
+                const condition:string = '';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            },
+
             byJti : (_:boolean,...fields:Field[]):string=>{
                 const condition:string = 'jti = :jti';
                 const tableName:string = `tno${this.tenentId}tokens`;

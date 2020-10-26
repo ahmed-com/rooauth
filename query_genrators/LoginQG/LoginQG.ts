@@ -61,6 +61,12 @@ export default class LoginQG{
 
         this.select = {
 
+            all : (ignorePagination:boolean,...fields:Field[]):string=>{
+                const condition:string = '';
+                const tableName:string = `tno${this.tenentId}logins`;
+                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            },
+
             bySubject : (ignorePagination:boolean,...fields:Field[]):string=>{
                 const condition:string = 'subject_id = :subject';
                 const tableName:string = `tno${this.tenentId}logins`;

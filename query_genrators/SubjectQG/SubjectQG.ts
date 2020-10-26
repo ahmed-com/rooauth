@@ -85,6 +85,12 @@ export default class SubjectQG{
 
         this.select = {
 
+            all : (ignorePagination:boolean,...fields:Field[]):string=>{
+                const condition:string = '';
+                const tableName:string = `tno${this.tenentId}subjects`;
+                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            },
+
             byId : (_:boolean,...fields:Field[]):string=>{
                 const condition:string = 'id = :id';
                 const tableName:string = `tno${this.tenentId}subjects`;

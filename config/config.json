@@ -4,8 +4,13 @@
         "ipRateLimit":100,
         "mfaDefault" : false,
         "ipWhiteListing" : false,
-        "storeLogins" : false,
+        "storeLogins" : {
+            "storeNone" : false,
+            "deviceInfo" : false,
+            "loggedAt" : false
+        },
         "storeCreatedAt": false,
-        "storeUpdatedAt" : false
+        "storeUpdatedAt" : false,
+        "mfaMethod" : "email"
     }
 }
