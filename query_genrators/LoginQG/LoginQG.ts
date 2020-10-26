@@ -1,17 +1,63 @@
-import InsertionField from "../InsertionFieldsInterface";
+import FieldCollection from '../FieldCollection';
 import StorageEngine from "../StorageEngineEnum";
-import { pagination } from "../utils";
+import { pagination , defienetionString, insertString } from "../utils";
 
 export default class LoginQG{
 
-    public extraInsertionFields:InsertionField;
-    public extraFields:string;
+    public fields:FieldCollection;
+    public readableFields:FieldCollection;
+    public writableFields:FieldCollection;
 
     constructor(
         private tenentId:number
     ){
-        this.extraFields = '';
-        this.extraInsertionFields = {fields : '' , values : ''};
+
+        this.fields = {
+            subjectId : {
+                name : 'subject_id',
+                definetion: 'subject_id INTEGER UNSIGNED NOT NULL',
+                insertionValue: ':subjectId',
+                updateValue: ':subjectId'
+            },
+
+            jti : {
+                name : 'jti',
+                definetion : 'jti INTEGER UNSIGNED NULL',
+                insertionValue : ':jti',
+                updateValue : ':jti'
+            },
+
+            passwordLogin : {
+                name : 'password_login',
+                definetion : 'password_login BOOLEAN NOT NULL',
+                insertionValue : ':passwordLogin',
+                updateValue : ':passwordLogin'
+            },
+
+            clientId : {
+                name : 'client_id',
+                definetion : 'client_id INTEGER UNSIGNED NOT NULL',
+                insertionValue : ':clientId',
+                updateValue : ':clientId'
+            },
+            
+            ip : {
+                name : 'ip',
+                definetion : 'CHAR(39) NOT NULL',
+                insertionValue : ':ip',
+                updateValue : ':ip'
+            }
+        }
+
+        this.readableFields = {
+            subjectId : this.fields.subjectId,
+            jti : this.fields.jti,
+            passwordLogin: this.fields.passwordLogin,
+            clientId : this.fields.clientId,
+            ip : this.fields.ip
+        }
+
+        this.writableFields = {}
     }
 
     public get id():number{
@@ -19,13 +65,10 @@ export default class LoginQG{
     }
 
     public createTable(engine:StorageEngine):string{
+        const fieldsString:string = defienetionString(this.fields);
+        
         return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}logins (
-            subject_id INTEGER UNSIGNED NOT NULL,
-            jti INTEGER UNSIGNED NULL,
-            password_login BOOLEAN NOT NULL,
-            client_id INTEGER UNSIGNED NOT NULL,
-            ip CHAR(39) NOT NULL,
-            ${this.extraFields}
+            ${fieldsString},
             FOREIGN KEY (jti) REFERENCES tno${this.tenentId}tokens(jti) ON DELETE SET NULL ON UPDATE CASCADE
         )ENGINE=${engine};`;
     }
@@ -35,22 +78,7 @@ export default class LoginQG{
      * {jti?:number, passwordLogin:boolean, clientId:number, ip:string}
      */
     public insertLogin():string{
-        return `
-        INSERT INTO tno${this.tenentId}logins(
-            subject_id,
-            jti,
-            password_login,
-            client_id,
-            ${this.extraInsertionFields.fields}
-            ip
-        )VALUES(
-            DEFAULT,
-            :jti,
-            :passwordLogin,
-            :clientId,
-            ${this.extraInsertionFields.values}
-            :ip
-        );`;
+        return insertString(this.fields,`tno${this.tenentId}logins`);
     }
 
     /**
