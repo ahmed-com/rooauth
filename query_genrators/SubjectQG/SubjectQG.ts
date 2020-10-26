@@ -1,6 +1,8 @@
+import Field from "../Field";
 import FieldCollection from '../FieldCollection';
 import StorageEngine from "../StorageEngineEnum";
-import {pagination , insertString, defienetionString} from '../utils';
+import SelectionCollection from "../SelectionCollection";
+import {pagination , insertString, defienetionString, constructSelect} from '../utils';
 
 export default class SubjectQG{
 
@@ -10,6 +12,8 @@ export default class SubjectQG{
 
     private enableMfa_default:string;
     private accountVerified_default:string;
+
+    public select:SelectionCollection;
 
     constructor(
         private tenentId:number
@@ -78,6 +82,22 @@ export default class SubjectQG{
         this.writableFields = {
             ...this.fields
         }
+
+        this.select = {
+
+            byId : (_:boolean,...fields:Field[]):string=>{
+                const condition:string = 'id = :id';
+                const tableName:string = `tno${this.tenentId}subjects`;
+                return constructSelect(fields,tableName,condition,"LIMIT 1");
+            },
+
+            byAccount : (_:boolean,...fields:Field[]):string=>{
+                const condition:string = 'id = :id';
+                const tableName:string = `tno${this.tenentId}subjects`;
+                return constructSelect(fields,tableName,condition,"LIMIT 1");
+            }
+
+        }
         
     }
 
@@ -110,21 +130,5 @@ export default class SubjectQG{
      */
     public disableMfaByDefault():string{
         return `ALTER TABLE tno${this.tenentId}subjects ALTER enable_mfa SET DEFAULT FALSE;`
-    }
-
-    /**
-     * @summary
-     * {id:number}
-     */
-    public selectSubjectById():string{
-        return `SELECT * FROM tno${this.tenentId}subjects WHERE id=:id LIMIT 1;`;
-    }
-
-    /**
-     * @summary
-     * {account:string}
-     */
-    public selectSubjectsByAccount():string{
-        return `SELECT * FROM tno${this.tenentId}subjects WHERE account=:account LIMIT 1;`;
     }
 }
