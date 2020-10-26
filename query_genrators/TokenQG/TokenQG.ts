@@ -1,12 +1,16 @@
 import FieldCollection from '../FieldCollection';
+import SelectionCollection from "../SelectionCollection";
+import Field from "../Field";
 import StorageEngine from "../StorageEngineEnum";
-import {pagination , insertString, defienetionString} from '../utils';
+import {pagination , insertString, defienetionString, constructSelect} from '../utils';
 
 export default class TokenQG{
 
     public fields:FieldCollection;
     public readableFields:FieldCollection;
     public writableFields:FieldCollection;
+
+    public select:SelectionCollection;
 
     constructor(
         private tenentId:number
@@ -38,9 +42,31 @@ export default class TokenQG{
             ...this.fields
         };
 
-        this .writableFields = {
+        this.writableFields = {
             ...this.fields
         }
+
+        this.select = {
+
+            byJti : (_:boolean,...fields:Field[]):string=>{
+                const condition:string = 'jti = :jti';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructSelect(fields,tableName,condition,"LIMIT 1");
+            },
+
+            tokensExpiredBeforeDate : (ignorePagination:boolean,...fields:Field[]):string=>{
+                const condition:string = 'exp < :date';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            },
+
+            bySub : (ignorePagination:boolean,...fields:Field[]):string=>{
+                const condition:string = 'sub = :sub';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            }
+        }
+
     }
 
     public get id():number{
@@ -59,31 +85,5 @@ export default class TokenQG{
 
     public insertToken():string{
         return insertString (this.fields,`tno${this.tenentId}tokens`)
-    }
-
-    /**
-     * @summary
-     * {jti:number}
-     */
-    public selectTokenById():string{
-        return `SELECT * FROM tno${this.tenentId}tokens WHERE jti=:jti LIMIT 1;`;
-    }
-
-    /**
-     * @summary
-     * {date:date , limit?:number , offset?:number}
-     */
-    public selectTokensExpiredBeforeDate(ignorePagination:boolean):string{
-        const pagination:string = ignorePagination ? "" : "LIMIT :limit OFFSET :offset";
-        return `SELECT * FROM tno${this.tenentId}tokens WHERE exp < :date` + pagination;
-    }
-
-    /**
-     * @summary
-     * {sub:number , limit?:number , offset?:number}
-     */
-    public selectTokensBySubject(ignorePagination:boolean):string{
-        const pagination:string = ignorePagination ? "" : "LIMIT :limit OFFSET :offset";
-        return `SELECT * FROM tno${this.tenentId}tokens WHERE sub = :sub` + pagination;
     }
 }
