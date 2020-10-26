@@ -1,6 +1,16 @@
+// enums
 import StorageEngine from "./StorageEngineEnum";
+
+// interfaces
 import InsertionField from "./InsertionFieldsInterface";
+
+// JSON
 import config from "../config/config.json";
+
+// classes
+import SubjectQG from './SubjectQG';
+import SessionQG from './SessionQG';
+import LoginsQG from './LoginsQG';
 
 
 export default class TenentQG {
@@ -46,7 +56,7 @@ export default class TenentQG {
      */
     extraSubjectFields:string;
     extraSessionFields:string;
-    extrasLoginFields:string;
+    extraLoginFields:string;
     extraSubjectInsertionFields:InsertionField;
     extraSessionInsertionFields:InsertionField;
     extraLoginInsertionFields:InsertionField;
@@ -55,7 +65,7 @@ export default class TenentQG {
 
     constructor(private tenentId:number){
         this.extraSubjectFields = '';
-        this.extrasLoginFields = '';
+        this.extraLoginFields = '';
         this.extraSessionFields = '';
         this.extraSubjectInsertionFields = {fields : '' , values : ''};
         this.extraSessionInsertionFields = {fields : '' , values : ''};
@@ -170,5 +180,17 @@ export default class TenentQG {
     static getIpWhiteList(ignorePagination:boolean):string{
         const pagination:string = ignorePagination ? "" : "LIMIT :limit OFFSET :offset";
         return "SELECT ip FROM ips WHERE tenent_id = :id" + pagination;
+    }
+
+    public getSubjectQG():SubjectQG{
+        return new SubjectQG(this.tenentId,this.extraSubjectInsertionFields,this.extraSubjectFields);
+    }
+
+    public getSessionQG():SessionQG{
+        return new SessionQG(this.tenentId, this.extraSessionInsertionFields,this.extraSessionFields);
+    }
+
+    public getLoginsQG():LoginsQG{
+        return new LoginsQG(this.tenentId, this.extraLoginInsertionFields, this.extraLoginFields)
     }
 }
