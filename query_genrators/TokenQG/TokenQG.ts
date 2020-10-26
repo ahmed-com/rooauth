@@ -1,16 +1,46 @@
-import InsertionField from "../InsertionFieldsInterface";
+import FieldCollection from '../FieldCollection';
 import StorageEngine from "../StorageEngineEnum";
+import {pagination , insertString, defienetionString} from '../utils';
 
 export default class TokenQG{
 
-    public extraInsertionFields:InsertionField;
-    public extraFields:string;
+    public fields:FieldCollection;
+    public readableFields:FieldCollection;
+    public writableFields:FieldCollection;
 
     constructor(
         private tenentId:number
     ){
-        this.extraFields = '';
-        this.extraInsertionFields = {fields : '' , values : ''};
+        this.fields = {
+            jti : {
+                name : 'jti',
+                definetion : 'INTEGER UNSIGNED NOT NULL UNIQUE auto_increment',
+                insertionValue : 'DEFAULT',
+                updateValue : ':jti'
+            },
+
+            sub : {
+                name : 'sub',
+                definetion : 'sub INTEGER UNSIGNED NOT NULL',
+                insertionValue : ':sub',
+                updateValue : ':sub'
+            },
+
+            exp : {
+                name : 'exp',
+                definetion : 'exp DATETIME NOT NULL',
+                insertionValue : ':exp',
+                updateValue : ':exp'
+            }
+        }
+
+        this.readableFields = {
+            ...this.fields
+        };
+
+        this .writableFields = {
+            ...this.fields
+        }
     }
 
     public get id():number{
@@ -18,33 +48,17 @@ export default class TokenQG{
     }
 
     public createTable(engine:StorageEngine):string{
+        const fieldsString:string = defienetionString(this.fields);
+
         return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}tokens (
-            jti INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
-            sub INTEGER UNSIGNED NOT NULL,
-            exp DATETIME NOT NULL,
-            ${this.extraFields}
+            ${fieldsString}
             PRIMARY KEY (jti),
             FOREIGN KEY (sub) REFERENCES tno${this.tenentId}subjects(id) ON DELETE CASCADE ON UPDATE CASCADE
         )ENGINE=${engine};`;
     }
 
-    /**
-     * @summary
-     * {sub:number,exp:date,verified?:boolean}
-     */
     public insertToken():string{
-        return `
-        INSERT INTO tno${this.tenentId}tokens(
-            jti,
-            sub,
-            ${this.extraInsertionFields.fields}
-            exp
-        )VALUES(
-            DEFAULT,
-            :sub,
-            ${this.extraInsertionFields.values}
-            :exp
-        );`;
+        return insertString (this.fields,`tno${this.tenentId}tokens`)
     }
 
     /**
