@@ -1,7 +1,7 @@
 import SelectionCollection from '../SelectionCollection';
 import FieldCollection from '../FieldCollection';
 import StorageEngine from "../StorageEngineEnum";
-import { defienetionString, insertString, constructSelect } from "../utils";
+import { pagination , defienetionString, insertString, constructSelect } from "../utils";
 import Field from '../Field';
 
 export default class LoginQG{
@@ -61,32 +61,28 @@ export default class LoginQG{
 
         this.select = {
 
-            bySubject : (ignorePagination?:boolean,...fields:Field[]):string=>{
-                const pagination:boolean = ignorePagination === undefined ? false : ignorePagination;
+            bySubject : (ignorePagination:boolean,...fields:Field[]):string=>{
                 const condition:string = 'subject_id = :subject';
                 const tableName:string = `tno${this.tenentId}logins`;
-                return constructSelect(fields,tableName,condition,pagination);
+                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
             },
 
-            byIp : (ignorePagination?:boolean,...fields:Field[]):string=>{
-                const pagination:boolean = ignorePagination === undefined ? false : ignorePagination;
+            byIp : (ignorePagination:boolean,...fields:Field[]):string=>{
                 const condition:string = 'ip = :ip';
                 const tableName:string = `tno${this.tenentId}logins`;
-                return constructSelect(fields,tableName,condition,pagination);
+                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
             },
 
-            byJti : (ignorePagination?:boolean,...fields:Field[]):string=>{
-                const pagination:boolean = ignorePagination === undefined ? false : ignorePagination;
+            byJti : (ignorePagination:boolean,...fields:Field[]):string=>{
                 const condition:string = 'jti = :jti';
                 const tableName:string = `tno${this.tenentId}logins`;
-                return constructSelect(fields,tableName,condition,pagination);
+                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
             },
 
-            byClientId : (ignorePagination?:boolean,...fields:Field[]):string=>{
-                const pagination:boolean = ignorePagination === undefined ? false : ignorePagination;
+            byClientId : (ignorePagination:boolean,...fields:Field[]):string=>{
                 const condition:string = 'client_id = :clientId';
                 const tableName:string = `tno${this.tenentId}logins`;
-                return constructSelect(fields,tableName,condition,pagination);
+                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
             }
         }
     }
@@ -107,20 +103,4 @@ export default class LoginQG{
     public insertLogin():string{
         return insertString(this.fields,`tno${this.tenentId}logins`);
     }
-
-    // /**
-    //  * @summary
-    //  * {date:date , limit?:number, offset?:number}
-    //  */
-    // public selectLoginsAfterDate(ignorePagination:boolean):string{
-    //     return `SELECT * FROM tno${this.tenentId}logins WHERE logged_at > :date` + pagination(ignorePagination);
-    // }
-
-    // /**
-    //  * @summary
-    //  * {date:date , limit?:number, offset?:number}
-    //  */
-    // public selectLoginsBeforeDate(ignorePagination:boolean):string{
-    //     return `SELECT * FROM tno${this.tenentId}logins WHERE logged_at < :date` + pagination(ignorePagination);
-    // }
 }

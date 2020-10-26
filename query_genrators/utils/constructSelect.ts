@@ -1,7 +1,6 @@
 import Field from "../Field";
-import pagination from './pagination';
 
-export default function constructSelect(fields:Field[], tableName:string , condition:string, ignorePagination:boolean):string{
+export default function constructSelect(fields:Field[], tableName:string , condition:string, pagination:string):string{
     let fieldsString:string;
 
     if (fields.length === 0){
@@ -15,7 +14,5 @@ export default function constructSelect(fields:Field[], tableName:string , condi
         }
     }
 
-    const paginationString:string = pagination(ignorePagination);
-
-    return `SELECT ${fieldsString} FROM ${tableName} WHERE ${condition} ${paginationString}`;
+    return `SELECT ${fieldsString} FROM ${tableName} WHERE ${condition} ${pagination}`;
 }
