@@ -50,11 +50,7 @@ export default class LoginQG{
         }
 
         this.readableFields = {
-            subjectId : this.fields.subjectId,
-            jti : this.fields.jti,
-            passwordLogin: this.fields.passwordLogin,
-            clientId : this.fields.clientId,
-            ip : this.fields.ip
+            ...this.fields
         }
 
         this.writableFields = {}
@@ -73,10 +69,6 @@ export default class LoginQG{
         )ENGINE=${engine};`;
     }
 
-    /**
-     * @summary
-     * {jti?:number, passwordLogin:boolean, clientId:number, ip:string}
-     */
     public insertLogin():string{
         return insertString(this.fields,`tno${this.tenentId}logins`);
     }

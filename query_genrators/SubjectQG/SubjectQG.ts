@@ -1,26 +1,84 @@
-import InsertionField from "../InsertionFieldsInterface";
+import FieldCollection from '../FieldCollection';
 import StorageEngine from "../StorageEngineEnum";
+import {pagination , insertString, defienetionString} from '../utils';
 
 export default class SubjectQG{
 
-    private oldPasswordHash_default:string;
-    private passwordChangedAt_default:string;
+    public fields:FieldCollection;
+    public readableFields:FieldCollection;
+    public writableFields:FieldCollection;
+
     private enableMfa_default:string;
     private accountVerified_default:string;
-
-    public extraInsertionFields:InsertionField;
-    public extraFields:string;
 
     constructor(
         private tenentId:number
     ){
-        this.extraFields = '';
-        this.extraInsertionFields = {fields : '' , values : ''};
 
-        this.oldPasswordHash_default = 'NULL';
-        this.passwordChangedAt_default = 'NULL';
         this.enableMfa_default = `(SELECT tenents.mfa_enable_default FROM tenents WHERE tenents.tenent_id = ${this.tenentId} LIMIT 1)`;
         this.accountVerified_default = 'FALSE';
+
+        this.fields = {
+            id : {
+                name : 'id',
+                definetion : 'id INTEGER UNSIGNED NOT NULL UNIQUE auto_increment',
+                insertionValue : 'DEFAULT',
+                updateValue: ':id'
+            },
+
+            account :{
+                name : 'account',
+                definetion: 'account VARCHAR(255) NOT NULL UNIQUE',
+                insertionValue: ':account',
+                updateValue : ':account'
+            },
+
+            passwordHash :{
+                name : 'password_hash',
+                definetion:'password_hash VARCHAR(255) NOT NULL',
+                insertionValue:':passwordHash',
+                updateValue:':passwordHash'
+            },
+
+            oldPasswordHash : {
+                name : 'old_password_hash',
+                definetion : 'old_password_hash VARCHAR(255) NULL',
+                insertionValue : ':oldPasswordHash',
+                updateValue : ':oldPasswordHash'
+            },
+
+            passwordChangedAt : {
+                name : 'password_changed_at',
+                definetion : 'password_changed_at DATETIME NULL',
+                insertionValue : ':passwordChangedAt',
+                updateValue : ':passwordChangedAt'
+            },
+
+            enableMfa : {
+                name : 'enable_mfa',
+                definetion : 'enable_mfa BOOLEAN NOT NULL',
+                default : this.enableMfa_default,
+                insertionValue : `IFNULL(:enableMfa,${this.enableMfa_default})`,
+                updateValue : ':enableMfa'
+            },
+
+            accountVerified : {
+                name: 'account_verified',
+                definetion : `account_verified BOOLEAN NOT NULL DEFAULT ${this.accountVerified_default}`,
+                default : this.accountVerified_default,
+                insertionValue : `IFNULL(:accountVerified,${this.accountVerified_default})`,
+                updateValue : ':accountVerified'
+            }
+        }
+
+        this.readableFields = {
+            ...this.fields
+        }
+
+        this.writableFields = {
+            ...this.fields
+        }
+        
     }
 
     public get id():number{
@@ -28,44 +86,16 @@ export default class SubjectQG{
     }
 
     public createTable(engine:StorageEngine):string{
+        const fieldsString:string = defienetionString(this.fields);
+
         return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}subjects (
-            id INTEGER UNSIGNED NOT NULL UNIQUE auto_increment,
-            account VARCHAR(255) NOT NULL UNIQUE,
-            password_hash VARCHAR(255) NOT NULL,
-            old_password_hash VARCHAR(255) NULL,
-            password_changed_at DATETIME NULL,
-            enable_mfa BOOLEAN NOT NULL,
-            account_verified BOOLEAN NOT NULL DEFAULT ${this.accountVerified_default},
-            ${this.extraFields}
+            ${fieldsString},
             PRIMARY KEY (id)
         ) ENGINE=${engine};`;
     }
 
-    /**
-     * @summary
-     * {account:string,passwordHash:string,oldPasswordHash?:string,passwordChangedAt?:date,enableMfa?:boolean,accountVerified:boolean}
-     */
     public insertSubject():string{
-        return `
-        INSERT INTO tno${this.tenentId}subjects (
-            id,
-            account,
-            password_hash,
-            old_password_hash,
-            password_changed_at,
-            enable_mfa,
-            ${this.extraInsertionFields.fields}
-            account_verified
-        )VALUES(
-            DEFAULT,
-            :account,
-            :passwordHash,
-            IFNULL(:oldPasswordHash,${this.oldPasswordHash_default}),
-            IFNULL(:passwordChangedAt,${this.passwordChangedAt_default}),
-            IFNULL(:enableMfa,${this.enableMfa_default}),
-            ${this.extraInsertionFields.values}
-            IFNULL(:accountVerified,${this.accountVerified_default})
-        );`;
+        return insertString (this.fields,`tno${this.tenentId}subjects`)
     }
 
     /**
