@@ -71,11 +71,11 @@ export default class TenentQG {
             updateValue : ':mfaMethod'
         },
 
-        privateKey : {
-            name : 'private_key',
-            definetion : `private_key VARCHAR(${TenentQG.privateKeyLength})`,
-            insertionValue : ':privateKey',
-            updateValue : ':privateKey'
+        privateKeyCipher : {
+            name : 'private_key_cipher',
+            definetion : `private_key_cipher VARCHAR(${TenentQG.privateKeyLength})`,
+            insertionValue : ':privateKeyCipher',
+            updateValue : ':privateKeyCipher'
         },
 
         publicKey : {
@@ -110,11 +110,11 @@ export default class TenentQG {
         },
 
         storeUpdatedAt : {
-            name : 'store_created_at',
-            definetion : `store_created_at BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreUpdatedAt}`,
+            name : 'store_updated_at',
+            definetion : `store_updated_at BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreUpdatedAt}`,
             default : `${TenentQG.defaultStoreUpdatedAt}`,
-            insertionValue : `IFNULL(:storeCreatedAt,${TenentQG.defaultStoreUpdatedAt})`,
-            updateValue : ':storeCreatedAt'
+            insertionValue : `IFNULL(:storeUpdateddAt,${TenentQG.defaultStoreUpdatedAt})`,
+            updateValue : ':storeUpdatedAt'
         },
 
         maxSession : {
@@ -157,10 +157,10 @@ export default class TenentQG {
             return constructSelect(fields,tableName,condition,pagination(ignorePagination));
         },
 
-        byTenentId : (ignorePagination:boolean,...fields:Field[]):string=>{
+        byTenentId : (_:boolean,...fields:Field[]):string=>{
             const condition:string = 'tenent_id = :tenentId';
             const tableName:string = `tenents`;
-            return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            return constructSelect(fields,tableName,condition,"LIMIT 1;");
         },
 
     }
@@ -198,5 +198,9 @@ export default class TenentQG {
 
     public getLoginsQG():LoginsQG{
         return new LoginsQG(this.tenentId);
+    }
+
+    public static doExist():string{
+        return `SELECT EXISTS( SELECT tenent_id FROM tenents WHERE tenent_id = :tenentId LIMIT 1 ) AS exists;`
     }
 }
