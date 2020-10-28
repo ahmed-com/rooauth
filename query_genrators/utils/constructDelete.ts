@@ -1,3 +1,7 @@
 export default function constructDelete(tableName:string,condition:string):string{
-    return `DELETE FROM ${tableName} WHERE ${condition} `;
+    let conditionalStatement:string = '';
+
+    if(condition !== '') conditionalStatement = `WHERE ${condition} `;
+
+    return `DELETE FROM ${tableName} ${conditionalStatement} `;
 }

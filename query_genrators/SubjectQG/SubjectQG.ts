@@ -2,7 +2,11 @@ import Field from "../Field";
 import FieldCollection from '../FieldCollection';
 import StorageEngine from "../StorageEngineEnum";
 import SelectionCollection from "../SelectionCollection";
-import {pagination , insertString, defienetionString, constructSelect} from '../utils';
+import UpdateCollection from '../UpdateCollection';
+import DeletionCollection from '../DeletionCollection';
+import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
+import { table } from "console";
+import constructDelete from "../utils/constructDelete";
 
 export default class SubjectQG{
 
@@ -14,6 +18,8 @@ export default class SubjectQG{
     private accountVerified_default:string;
 
     public select:SelectionCollection;
+    public update:UpdateCollection;
+    public delete:DeletionCollection;
 
     constructor(
         private tenentId:number
@@ -98,11 +104,55 @@ export default class SubjectQG{
             },
 
             byAccount : (_:boolean,...fields:Field[]):string=>{
-                const condition:string = 'id = :id';
+                const condition:string = 'account = :account';
                 const tableName:string = `tno${this.tenentId}subjects`;
                 return constructSelect(fields,tableName,condition,"LIMIT 1");
             }
 
+        }
+
+        this.update = {
+
+            all : (...fields:Field[]):string=>{
+                const condition:string = '';
+                const tableName:string = `tno${this.tenentId}subjects`;
+                return constructUpdate(fields,tableName,condition);
+            },
+
+            byId : (...fields:Field[]):string=>{
+                const condition:string = 'id = :id';
+                const tableName:string = `tno${this.tenentId}subjects`;
+                return constructUpdate(fields,tableName,condition);
+            },
+
+            byAccount : (...fields:Field[]):string=>{
+                const condition:string = 'account = :account';
+                const tableName:string = `tno${this.tenentId}subjects`;
+                return constructUpdate(fields,tableName,condition);
+            },
+
+        },
+
+        this.delete = {
+
+            all : ():string=>{
+                const condition:string = '';
+                const tableName:string = `tno${this.tenentId}subjects`;
+                return constructDelete(tableName,condition);
+            },
+            
+            byId : ():string=>{
+                const condition:string = 'id = :id';
+                const tableName:string = `tno${this.tenentId}subjects`;
+                return constructDelete(tableName,condition);
+            },
+            
+            byAccount : ():string=>{
+                const condition:string = 'account = :account';
+                const tableName:string = `tno${this.tenentId}subjects`;
+                return constructDelete(tableName,condition);
+            },
+            
         }
         
     }

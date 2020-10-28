@@ -1,6 +1,7 @@
 import Field from '../Field';
 import SubjectQG from './SubjectQG';
-import { constructSelect, pagination } from '../utils';
+import { constructSelect, constructUpdate, pagination } from '../utils';
+import constructDelete from '../utils/constructDelete';
 
 export default class CreatedAt extends SubjectQG{
 
@@ -26,17 +27,53 @@ export default class CreatedAt extends SubjectQG{
             ...sQG.select
         }
 
+        this.update = {
+            subjectsCreatedAfterDate: this.updateSubjectCreatedAfterDate,
+            subjectsCreatedBeforeDate: this.updateSubjectCreatedBeforeDate,
+            ...sQG.update
+        }
+
+        this.delete = {
+            subjectsCreatedAfterDate: this.deleteSubjectCreatedAfterDate,
+            subjectsCreatedBeforeDate: this.deleteSubjectCreatedBeforeDate,
+            ...sQG.delete
+        }
+
     }
 
     private selectSubjectCreatedAfterDate(ignorePagination:boolean,...fields:Field[]):string{
-        const condition:string = 'created_at > :date';
+        const condition:string = 'created_at > :createdAt';
         const tableName:string = `tno${this.id}subject`;
         return constructSelect(fields,tableName,condition,pagination(ignorePagination));
     }
 
     private selectSubjectCreatedBeforeDate(ignorePagination:boolean,...fields:Field[]):string{
-        const condition:string = 'created_at < :date';
+        const condition:string = 'created_at < :createdAt';
         const tableName:string = `tno${this.id}subject`;
         return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+    }
+
+    private updateSubjectCreatedAfterDate(...fields:Field[]):string{
+        const condition:string = 'created_at > :createdAt';
+        const tableName:string = `tno${this.id}subject`;
+        return constructUpdate(fields,tableName,condition);
+    }
+
+    private updateSubjectCreatedBeforeDate(...fields:Field[]):string{
+        const condition:string = 'created_at < :createdAt';
+        const tableName:string = `tno${this.id}subject`;
+        return constructUpdate(fields,tableName,condition);
+    }
+
+    private deleteSubjectCreatedAfterDate():string{
+        const condition:string = 'created_at > :createdAt';
+        const tableName:string = `tno${this.id}subject`;
+        return constructDelete(tableName,condition);
+    }
+
+    private deleteSubjectCreatedBeforeDate():string{
+        const condition:string = 'created_at < :createdAt';
+        const tableName:string = `tno${this.id}subject`;
+        return constructDelete(tableName,condition);
     }
 }

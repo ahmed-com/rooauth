@@ -1,8 +1,11 @@
 import FieldCollection from '../FieldCollection';
 import SelectionCollection from "../SelectionCollection";
+import UpdateCollection from '../UpdateCollection';
+import DeleteCollection from '../DeletionCollection';
 import Field from "../Field";
 import StorageEngine from "../StorageEngineEnum";
-import {pagination , insertString, defienetionString, constructSelect} from '../utils';
+import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
+import constructDelete from '../utils/constructDelete';
 
 export default class TokenQG{
 
@@ -11,6 +14,8 @@ export default class TokenQG{
     public writableFields:FieldCollection;
 
     public select:SelectionCollection;
+    public update:UpdateCollection;
+    public delete:DeleteCollection;
 
     constructor(
         private tenentId:number
@@ -61,7 +66,7 @@ export default class TokenQG{
             },
 
             tokensExpiredBeforeDate : (ignorePagination:boolean,...fields:Field[]):string=>{
-                const condition:string = 'exp < :date';
+                const condition:string = 'exp < :exp';
                 const tableName:string = `tno${this.tenentId}tokens`;
                 return constructSelect(fields,tableName,condition,pagination(ignorePagination));
             },
@@ -71,6 +76,62 @@ export default class TokenQG{
                 const tableName:string = `tno${this.tenentId}tokens`;
                 return constructSelect(fields,tableName,condition,pagination(ignorePagination));
             }
+        }
+
+        this.update = {
+
+            all : (...fields:Field[]):string=>{
+                const condition:string = '';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructUpdate(fields,tableName,condition);
+            },
+
+            byJti : (...fields:Field[]):string=>{
+                const condition:string = 'jti = :jti';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructUpdate(fields,tableName,condition);
+            },
+
+            tokensExpiredBeforeDate : (...fields:Field[]):string=>{
+                const condition:string = 'exp < :exp';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructUpdate(fields,tableName,condition);
+            },
+
+            bySub : (...fields:Field[]):string=>{
+                const condition:string = 'sub = :sub';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructUpdate(fields,tableName,condition);
+            }
+
+        }
+
+        this.delete = {
+
+            all : ():string => {
+                const condition:string = '';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructDelete(tableName,condition);
+            },
+
+            byJti : ():string => {
+                const condition:string = 'jti = :jti';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructDelete(tableName,condition);
+            },
+
+            bySub : ():string => {
+                const condition:string = 'sub = :sub';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructDelete(tableName,condition);
+            },
+
+            tokensExpiredBeforeDate : ():string => {
+                const condition:string = 'exp < :exp';
+                const tableName:string = `tno${this.tenentId}tokens`;
+                return constructDelete(tableName,condition);
+            }
+
         }
 
     }

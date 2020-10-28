@@ -1,9 +1,7 @@
 import TenentQG from '../../query_genrators/TenentQG/TenentQG';
 import SubjectSchema from './Schema';
 import MfaMethod from './MfaMethodEnum';
-import Ip from '../Ip/Ip';
 import ITenentStore from './ITenentStore';
-import Client from '../Client/Client';
 import pool from "../../services/db/db";
 import TenentDBRow from './TenentDBRow';
 import Field from '../../query_genrators/Field';
@@ -22,11 +20,9 @@ export default class Tenent{
     private _privateKey?:string;
     private _publicKey?:string;
     private _hasIpWhiteList?:boolean;
-    private _ipWhiteList?:Ip[];
     private _tenentStore?:ITenentStore;
     private _maxSession?:number;
     private _ipRateLimit?:number;
-    private _clientList?:Client[];
 
     constructor(id:number){
         this.id = id;

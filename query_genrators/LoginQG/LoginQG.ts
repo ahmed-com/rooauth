@@ -1,8 +1,11 @@
 import SelectionCollection from '../SelectionCollection';
+import UpdateCollection from '../UpdateCollection';
+import DeletionCollection from '../DeletionCollection';
 import FieldCollection from '../FieldCollection';
 import StorageEngine from "../StorageEngineEnum";
-import { pagination , defienetionString, insertString, constructSelect } from "../utils";
+import { pagination , defienetionString, insertString, constructSelect, constructUpdate } from "../utils";
 import Field from '../Field';
+import constructDelete from '../utils/constructDelete';
 
 export default class LoginQG{
 
@@ -11,6 +14,8 @@ export default class LoginQG{
     public writableFields:FieldCollection;
 
     public select:SelectionCollection;
+    public update:UpdateCollection;
+    public delete:DeletionCollection;
 
     constructor(
         private tenentId:number
@@ -57,6 +62,9 @@ export default class LoginQG{
             ...this.fields
         }
 
+        /**
+         * there are no field that is writable in the log
+         */
         this.writableFields = {}
 
         this.select = {
@@ -68,7 +76,7 @@ export default class LoginQG{
             },
 
             bySubject : (ignorePagination:boolean,...fields:Field[]):string=>{
-                const condition:string = 'subject_id = :subject';
+                const condition:string = 'subject_id = :subjectId';
                 const tableName:string = `tno${this.tenentId}logins`;
                 return constructSelect(fields,tableName,condition,pagination(ignorePagination));
             },
@@ -91,6 +99,16 @@ export default class LoginQG{
                 return constructSelect(fields,tableName,condition,pagination(ignorePagination));
             }
         }
+
+        /**
+         * you cannot update any records from the log
+         */
+        this.update = {}
+
+        /**
+         * you cannot delete any records from the log
+         */
+        this.delete = {}
     }
 
     public get id():number{
