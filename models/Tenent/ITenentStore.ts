@@ -3,5 +3,5 @@ export default interface ITenentStore{
         createdAt:boolean,
         updatedAt:boolean
     },
-    storeForeLogins: JSON
+    storeForeLogins: string
 }

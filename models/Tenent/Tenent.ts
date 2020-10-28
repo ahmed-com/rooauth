@@ -6,10 +6,13 @@ import pool from "../../services/db/db";
 import TenentDBRow from './TenentDBRow';
 import Field from '../../query_genrators/Field';
 import { encryptText , decryptCipher } from '../../cryptographer';
+import ITenentStoreInput from './ITenentStoreInput';
+import Execute from './ExecuteType';
 
 export default class Tenent{
 
     private static queryGenerator = TenentQG;
+    private static execute:Execute = (query:string, data:object) => pool.execute(query,data);
 
     public id:number;
 
@@ -24,14 +27,18 @@ export default class Tenent{
     private _maxSession?:number;
     private _ipRateLimit?:number;
 
+    private execute:Execute;
+
     constructor(id:number){
         this.id = id;
+
+        this.execute = (query:string, data:object) => pool.execute(query,data);
     };
 
     private async doExist():Promise<boolean>{
-        const query:string = TenentQG.doExist();
+        const query:string = Tenent.queryGenerator.doExist();
 
-        return pool.execute(query,{
+        return this.execute(query,{
             tenentId: this.id
         })
         .then(result=>result[0])
@@ -69,10 +76,10 @@ export default class Tenent{
 
     private populateFromDB():Promise<void>{
         const tenent:Tenent = this;
-        const allReadableFields:Field[] = Object.values(TenentQG.readableFields);
-        const query:string = TenentQG.select.byTenentId(true,...allReadableFields);
+        const allReadableFields:Field[] = Object.values(Tenent.queryGenerator.readableFields);
+        const query:string = Tenent.queryGenerator.select.byTenentId(true,...allReadableFields);
 
-        return pool.execute(query,{
+        return this.execute(query,{
             tenentId : this.id
         })
         .then(function captureTheFirstResult(result:TenentDBRow[]):TenentDBRow{
@@ -198,4 +205,43 @@ export default class Tenent{
                 });
         }
     }
+
+    private static InsertTenent(
+        mfaMethod:MfaMethod | null,
+        mfaDefault:boolean | null,
+        privateKeyCipher:string,
+        publicKey:string,
+        hasIpWhiteList:boolean | null,
+        tenentStore:ITenentStore | ITenentStoreInput,
+        maxSession:number | null,
+        ipRateLimit:number | null,
+        schema:SubjectSchema | null,
+        execute:Execute
+    ):Promise<number>{
+        const query:string = Tenent.queryGenerator.insertTenent();
+
+        const subjectSchema:string = JSON.stringify(schema);
+        const allowIpWhieListing:boolean | null = hasIpWhiteList;
+        const mfaEnableDefault:boolean | null = mfaDefault;
+        const storeLogins:string | null = tenentStore.storeForeLogins;
+        const storeCreatedAt:boolean | null = tenentStore.storeForSubject.createdAt;
+        const storeUpdatedAt:boolean | null = tenentStore.storeForSubject.updatedAt;
+
+        return execute(query,{
+            subjectSchema,
+            mfaEnableDefault,
+            mfaMethod : mfaMethod === null ? mfaMethod : MfaMethod[mfaMethod],
+            privateKeyCipher,
+            publicKey,
+            allowIpWhieListing,
+            storeLogins,
+            storeCreatedAt,
+            storeUpdatedAt,
+            maxSession,
+            ipRateLimit
+        })
+        .then(({insertId})=>insertId);
+    }
+
+    
 }

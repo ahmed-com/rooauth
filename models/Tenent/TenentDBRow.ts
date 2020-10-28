@@ -9,7 +9,7 @@ export default interface TenentDBRow{
     private_key_cipher?:string,
     public_key?:string,
     allow_ip_white_listing?:boolean,
-    store_logins?:JSON,
+    store_logins?:string,
     store_created_at?:boolean,
     store_updated_at?:boolean,
     max_session?:number,

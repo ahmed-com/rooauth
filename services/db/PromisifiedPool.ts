@@ -1,5 +1,6 @@
-import { myExecute } from "./types";
+import { myExecute , multipleExecute } from "./types";
 
 export default interface PromisifiedPool{
-    execute : myExecute
+    execute : myExecute,
+    multipleExecute : multipleExecute
 }
