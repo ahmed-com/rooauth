@@ -2,7 +2,7 @@ export default interface ITenentStoreInput{
     storeForSubject:{
         createdAt:boolean | null,
         updatedAt:boolean | null,
-        data:boolean | null
+        data:boolean
     },
     storeForLogins: {
         deviceInfo : boolean | null,

@@ -6,9 +6,15 @@ import Field from "../Field";
 import FieldCollection from '../FieldCollection';
 import SelectionCollection from "../SelectionCollection";
 import {pagination , insertString, defienetionString, constructSelect} from '../utils';
+
 import subjectCreatedAtDecorator from '../SubjectQG/CreatedAt'
 import subjectUpdatedAtDecorator from '../SubjectQG/UpdatedAt'
 import subjectDataAtDecorator from '../SubjectQG/Data'
+
+import tokenVerifiedDecorator from '../TokenQG/Verified';
+
+import loginTimeDecorator from '../LoginQG/LoggedAt';
+import loginDeviceInfoDecorator from '../LoginQG/DeviceInfo';
 
 // JSON
 import config from "../../config/config.json";
@@ -211,19 +217,32 @@ export default class TenentQG {
     }
 
     public getSubjectQG(tenentStore:ITenentStore):SubjectQG{
-        let subjectQG = new SubjectQG(this.tenentId);
+        let subjectQG:SubjectQG = new SubjectQG(this.tenentId);
 
         if(tenentStore.storeForSubject.createdAt) subjectQG = new subjectCreatedAtDecorator(subjectQG);
         if(tenentStore.storeForSubject.updatedAt) subjectQG = new subjectUpdatedAtDecorator(subjectQG);
-        return new SubjectQG(this.tenentId);
+        if(tenentStore.storeForSubject.data) subjectQG = new subjectDataAtDecorator(subjectQG);
+
+        return subjectQG;
     }
 
-    public getTokenQG():TokenQG{
-        return new TokenQG(this.tenentId);
+    public getTokenQG(tenentStore:ITenentStore):TokenQG{
+        let tokenQG:TokenQG = new TokenQG(this.tenentId);
+
+        if(tenentStore.storeForTokens.verified) tokenQG = new tokenVerifiedDecorator(tokenQG);
+
+        return tokenQG;
     }
 
-    public getLoginsQG():LoginsQG{
-        return new LoginsQG(this.tenentId);
+    public getLoginsQG(tenentStore:ITenentStore):LoginsQG{
+        let loginQG:LoginsQG = new LoginsQG(this.tenentId);
+
+        if(tenentStore.storeForLogins === false) throw new Error();
+
+        if(tenentStore.storeForLogins.loggedAt) loginQG = new loginTimeDecorator(loginQG);
+        if(tenentStore.storeForLogins.deviceInfo)loginQG = new loginDeviceInfoDecorator(loginQG);
+
+        return loginQG;
     }
 
     public static doExist():string{

@@ -5,14 +5,19 @@ import ITenentStore from './ITenentStore';
 import pool from "../../services/db/db";
 import TenentDBRow from './TenentDBRow';
 import Field from '../../query_genrators/Field';
-import { encryptText , decryptCipher } from '../../cryptographer';
+import { encryptText , decryptCipher, generateKeys, getMySecret } from '../../cryptographer';
 import ITenentStoreInput from './ITenentStoreInput';
-import Execute from './ExecuteType';
+import {multipleExecute, myExecute} from '../../services/db/types';
+import SubjectQG from '../../query_genrators/SubjectQG/SubjectQG';
+import TokenQG from '../../query_genrators/TokenQG/TokenQG';
+import LoginQG from '../../query_genrators/LoginQG/LoginQG';
+import StorageEngine from '../../query_genrators/StorageEngineEnum';
 
 export default class Tenent{
 
     private static queryGenerator = TenentQG;
-    private static execute:Execute = (query:string, data:object) => pool.execute(query,data);
+    private static manyExecute:multipleExecute = pool.manyExecute;
+    public static execute:myExecute = pool.execute;
 
     public id:number;
 
@@ -27,12 +32,14 @@ export default class Tenent{
     private _maxSession?:number;
     private _ipRateLimit?:number;
 
-    private execute:Execute;
+    public execute:myExecute;
+    private manyExecute:multipleExecute;
 
     constructor(id:number){
         this.id = id;
 
-        this.execute = (query:string, data:object) => pool.execute(query,data);
+        this.execute = pool.execute;
+        this.manyExecute = pool.manyExecute;
     };
 
     private async doExist():Promise<boolean>{
@@ -87,7 +94,7 @@ export default class Tenent{
         }
     }
 
-    private populateFromDB():Promise<void>{
+    private async populateFromDB():Promise<void>{
         const tenent:Tenent = this;
         const allReadableFields:Field[] = Object.values(Tenent.queryGenerator.readableFields);
         const query:string = Tenent.queryGenerator.select.byTenentId(true,...allReadableFields);
@@ -219,7 +226,7 @@ export default class Tenent{
         }
     }
 
-    private static InsertTenent(
+    private static async InsertTenent(
         mfaMethod:MfaMethod | null,
         mfaDefault:boolean | null,
         privateKeyCipher:string,
@@ -229,7 +236,7 @@ export default class Tenent{
         maxSession:number | null,
         ipRateLimit:number | null,
         schema:SubjectSchema | null,
-        execute:Execute
+        execute:myExecute
     ):Promise<number>{
         const query:string = Tenent.queryGenerator.insertTenent();
 
@@ -278,16 +285,54 @@ export default class Tenent{
     public static async createTenent(
         mfaMethod:MfaMethod | null,
         mfaDefault:boolean | null,
-        privateKeyCipher:string,
-        publicKey:string,
         hasIpWhiteList:boolean | null,
         tenentStore:ITenentStore | ITenentStoreInput,
         maxSession:number | null,
         ipRateLimit:number | null,
         schema:SubjectSchema | null
     ):Promise<Tenent>{
-        
+        const secret = await getMySecret();
+        const {publicKey , privateKey} = await generateKeys(); 
+        const privateKeyCipher:string = await encryptText(privateKey);
 
-        return Promise.resolve(new Tenent(1)); // just telling VSCode to stop bothering me
+        let tenent:Tenent;
+
+        return Tenent.manyExecute(async function insertTenentInDB(execute:myExecute) {
+            const insertId:number = await Tenent.InsertTenent(
+                mfaMethod,
+                mfaDefault,
+                privateKeyCipher,
+                publicKey,
+                hasIpWhiteList,
+                tenentStore,
+                maxSession,
+                ipRateLimit,
+                schema,
+                execute
+            );
+
+            tenent = new Tenent(insertId);
+
+            const defaultExecute:myExecute = tenent.execute;
+            tenent.execute = execute;
+            const _tenentStore:ITenentStore = await tenent.tenentStore;
+
+            const tenentQG:TenentQG = new TenentQG(insertId);
+            const subjectQG:SubjectQG = tenentQG.getSubjectQG(_tenentStore);
+            const tokenQG:TokenQG = tenentQG.getTokenQG(_tenentStore);
+            const loginQG:LoginQG | null = tenentQG.getLoginsQG(_tenentStore);
+
+            const createSubjectTableQuery:string = subjectQG.createTable(StorageEngine.InnoDB);
+            const createTokenTableQuery:string = tokenQG.createTable(StorageEngine.InnoDB);
+            let createLoginTableQuery:string = '';
+            if(loginQG !== null) createLoginTableQuery = loginQG.createTable(StorageEngine.InnoDB);
+
+            await execute(createSubjectTableQuery,{});
+            await execute(createTokenTableQuery,{});
+            if(loginQG !== null) await execute(createLoginTableQuery,{});
+
+            tenent.execute = defaultExecute;
+        })
+        .then(()=>tenent);
     }
 }

@@ -2,6 +2,7 @@ import encryptText from "./encrypt";
 import initializeMySecret from './initializeSecret';
 import getMySecret from './getSecret';
 import decryptCipher from './decrypt';
+import generateKeys from './generateKeys'
 
 const { SodiumPlus , CryptographyKey } = require('sodium-plus');
 
@@ -22,6 +23,7 @@ export {
     encryptText,
     initializeMySecret,
     getMySecret,
-    decryptCipher
+    decryptCipher,
+    generateKeys
 };
 
