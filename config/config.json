@@ -4,11 +4,9 @@
         "ipRateLimit":100,
         "mfaDefault" : false,
         "ipWhiteListing" : false,
-        "storeLogins" : {
-            "storeNone" : false,
-            "deviceInfo" : false,
-            "loggedAt" : false
-        },
+        "storeLogins" : true,
+        "storeLoginTime" : false,
+        "storeLoginDeviceInfo" : false,
         "storeCreatedAt": false,
         "storeUpdatedAt" : false,
         "mfaMethod" : "email"

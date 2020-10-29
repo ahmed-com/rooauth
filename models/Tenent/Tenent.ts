@@ -16,7 +16,7 @@ export default class Tenent{
 
     public id:number;
 
-    private _schema?:SubjectSchema;
+    private _schema?:SubjectSchema | null;
     private _mfaDefault?:boolean;
     private _mfaMethod?:MfaMethod;
     private _privateKeyCipher?:string;
@@ -60,16 +60,29 @@ export default class Tenent{
         this._ipRateLimit = row.ip_rate_limit;
 
         if(
-            row.store_logins     !== undefined &&
-            row.store_created_at !== undefined &&
-            row.store_updated_at !== undefined
+            row.store_logins            !== undefined &&
+            row.store_created_at        !== undefined &&
+            row.store_updated_at        !== undefined &&
+            row.store_login_time        !== undefined &&
+            row.store_login_device_info !== undefined &&
+            row.subject_schema          !== undefined
         ){
+            let storeForLogins:any = false;
+            if(row.store_logins === true) storeForLogins = {
+                deviceInfo : row.store_login_device_info,
+                loggedAt : row.store_login_time
+            }
+
             this._tenentStore = {
                 storeForSubject : {
                     createdAt : row.store_created_at,
-                    updatedAt : row.store_updated_at
+                    updatedAt : row.store_updated_at,
+                    data : row.subject_schema === null ? false : true
                 },
-                storeForeLogins : row.store_logins
+                storeForLogins,
+                storeForTokens:{
+                    verified : true
+                }
             }; 
         }
     }
@@ -94,7 +107,7 @@ export default class Tenent{
         });
     }
     
-    public get schema():Promise<SubjectSchema>{
+    public get schema():Promise<SubjectSchema | null>{
         if(this._schema !== undefined){
             return Promise.resolve(this._schema);
         }else{
@@ -223,10 +236,27 @@ export default class Tenent{
         const subjectSchema:string = JSON.stringify(schema);
         const allowIpWhieListing:boolean | null = hasIpWhiteList;
         const mfaEnableDefault:boolean | null = mfaDefault;
-        const storeLogins:string | null = tenentStore.storeForeLogins;
         const storeCreatedAt:boolean | null = tenentStore.storeForSubject.createdAt;
         const storeUpdatedAt:boolean | null = tenentStore.storeForSubject.updatedAt;
 
+        let storeLogins:boolean | null;
+        let storeLoginTime:boolean | null;
+        let storeLoginDeviceInfo:boolean | null;
+
+        if(tenentStore.storeForLogins === false){
+            storeLogins = false;
+            storeLoginTime = false;
+            storeLoginDeviceInfo = false;
+        }else if(tenentStore.storeForLogins === null){
+            storeLogins = null;
+            storeLoginTime = null;
+            storeLoginDeviceInfo = null;
+        }else{
+            storeLogins = true;
+            storeLoginTime = tenentStore.storeForLogins.loggedAt;
+            storeLoginDeviceInfo = tenentStore.storeForLogins.deviceInfo;
+        }
+        
         return execute(query,{
             subjectSchema,
             mfaEnableDefault,
@@ -235,6 +265,8 @@ export default class Tenent{
             publicKey,
             allowIpWhieListing,
             storeLogins,
+            storeLoginDeviceInfo,
+            storeLoginTime,
             storeCreatedAt,
             storeUpdatedAt,
             maxSession,
@@ -243,5 +275,19 @@ export default class Tenent{
         .then(({insertId})=>insertId);
     }
 
-    
+    public static async createTenent(
+        mfaMethod:MfaMethod | null,
+        mfaDefault:boolean | null,
+        privateKeyCipher:string,
+        publicKey:string,
+        hasIpWhiteList:boolean | null,
+        tenentStore:ITenentStore | ITenentStoreInput,
+        maxSession:number | null,
+        ipRateLimit:number | null,
+        schema:SubjectSchema | null
+    ):Promise<Tenent>{
+        
+
+        return Promise.resolve(new Tenent(1)); // just telling VSCode to stop bothering me
+    }
 }

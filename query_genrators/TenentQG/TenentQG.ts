@@ -6,6 +6,9 @@ import Field from "../Field";
 import FieldCollection from '../FieldCollection';
 import SelectionCollection from "../SelectionCollection";
 import {pagination , insertString, defienetionString, constructSelect} from '../utils';
+import subjectCreatedAtDecorator from '../SubjectQG/CreatedAt'
+import subjectUpdatedAtDecorator from '../SubjectQG/UpdatedAt'
+import subjectDataAtDecorator from '../SubjectQG/Data'
 
 // JSON
 import config from "../../config/config.json";
@@ -14,6 +17,7 @@ import config from "../../config/config.json";
 import SubjectQG from '../SubjectQG/SubjectQG';
 import TokenQG from '../TokenQG/TokenQG';
 import LoginsQG from '../LoginQG/LoginQG';
+import ITenentStore from "../../models/Tenent/ITenentStore";
 
 
 export default class TenentQG {
@@ -34,7 +38,9 @@ export default class TenentQG {
     static defaultIpWhiteListing:boolean = config.defaults.ipWhiteListing;
     static defaultStoreCreatedAt:boolean = config.defaults.storeCreatedAt;
     static defaultStoreUpdatedAt:boolean = config.defaults.storeUpdatedAt;
-    static defaultStoreLogins:string = JSON.stringify(config.defaults.storeLogins);
+    static defaultStoreLogins:boolean = config.defaults.storeLogins;
+    static defaultStoreLoginTime:boolean = config.defaults.storeLoginTime;
+    static defaultStoreLoginDeviceInfo:boolean = config.defaults.storeLoginDeviceInfo;
 
     /**
      * all the fields
@@ -95,10 +101,26 @@ export default class TenentQG {
 
         storeLogins : {
             name : 'store_logins',
-            definetion : `store_logins JSON NOT NULL DEFAULT ${TenentQG.defaultStoreLogins}`,
-            default : TenentQG.defaultStoreLogins,
+            definetion : `store_logins BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreLogins}`,
+            default : `${TenentQG.defaultStoreLogins}`,
             insertionValue : `IFNULL(:storeLogins,${TenentQG.defaultStoreLogins})`,
             updateValue : ':storeLogins'
+        },
+
+        storeLoginTime : {
+            name : 'store_login_time',
+            definetion : `store_login_time BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreLoginTime}`,
+            default : `${TenentQG.defaultStoreLoginTime}`,
+            insertionValue : `IFNULL(:storeLoginTime,${TenentQG.defaultStoreLoginTime})`,
+            updateValue : ':storeLoginTime'
+        },
+
+        storeLoginDeviceInfo : {
+            name : 'store_login_device_info',
+            definetion : `store_login_device_info BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreLoginDeviceInfo}`,
+            default : `${TenentQG.defaultStoreLoginDeviceInfo}`,
+            insertionValue : `IFNULL(:storeLoginDeviceInfo,${TenentQG.defaultStoreLoginDeviceInfo})`,
+            updateValue : ':storeLoginDeviceInfo'
         },
 
         storeCreatedAt : {
@@ -188,7 +210,11 @@ export default class TenentQG {
         return insertString (TenentQG.fields,`tenents`);
     }
 
-    public getSubjectQG():SubjectQG{
+    public getSubjectQG(tenentStore:ITenentStore):SubjectQG{
+        let subjectQG = new SubjectQG(this.tenentId);
+
+        if(tenentStore.storeForSubject.createdAt) subjectQG = new subjectCreatedAtDecorator(subjectQG);
+        if(tenentStore.storeForSubject.updatedAt) subjectQG = new subjectUpdatedAtDecorator(subjectQG);
         return new SubjectQG(this.tenentId);
     }
 

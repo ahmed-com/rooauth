@@ -1,7 +1,14 @@
 export default interface ITenentStore{
     storeForSubject:{
         createdAt:boolean,
-        updatedAt:boolean
+        updatedAt:boolean,
+        data:boolean
     },
-    storeForeLogins: string
+    storeForLogins: {
+        deviceInfo : boolean,
+        loggedAt : boolean
+    } | false,
+    storeForTokens : {
+        verified : boolean
+    }
 }

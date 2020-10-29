@@ -3,13 +3,15 @@ import MfaMethod from './MfaMethodEnum';
 
 export default interface TenentDBRow{
     tenent_id?:number,
-    subject_schema?:SubjectSchema,
+    subject_schema?:SubjectSchema | null,
     mfa_enable_default?:boolean,
     mfa_method?:MfaMethod,
     private_key_cipher?:string,
     public_key?:string,
     allow_ip_white_listing?:boolean,
-    store_logins?:string,
+    store_logins?:boolean,
+    store_login_time?:boolean,
+    store_login_device_info?:boolean,
     store_created_at?:boolean,
     store_updated_at?:boolean,
     max_session?:number,
