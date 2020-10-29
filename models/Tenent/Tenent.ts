@@ -5,13 +5,15 @@ import ITenentStore from './ITenentStore';
 import pool from "../../services/db/db";
 import TenentDBRow from './TenentDBRow';
 import Field from '../../query_genrators/Field';
-import { encryptText , decryptCipher, generateKeys, getMySecret } from '../../cryptographer';
+import { encryptText , decryptCipher, generateKeys } from '../../cryptographer';
 import ITenentStoreInput from './ITenentStoreInput';
 import {multipleExecute, myExecute} from '../../services/db/types';
 import SubjectQG from '../../query_genrators/SubjectQG/SubjectQG';
 import TokenQG from '../../query_genrators/TokenQG/TokenQG';
 import LoginQG from '../../query_genrators/LoginQG/LoginQG';
 import StorageEngine from '../../query_genrators/StorageEngineEnum';
+import ITenentUpdateDataObj from './ITenentDataObj';
+import ITenentFieldObj from './ITenentFieldObj';
 
 export default class Tenent{
 
@@ -35,12 +37,29 @@ export default class Tenent{
     public execute:myExecute;
     private manyExecute:multipleExecute;
 
+    private changes:{fields:ITenentFieldObj, dataObj:ITenentUpdateDataObj};
+
     constructor(id:number){
         this.id = id;
 
         this.execute = pool.execute;
         this.manyExecute = pool.manyExecute;
+        this.changes = {
+            fields : {},
+            dataObj : {}
+        }
     };
+
+    private async saveChanges():Promise<void>{
+        const tenentExist:boolean = await this.doExist();
+        if(!tenentExist) throw new Error("Tenent Doesn't exist");
+
+        const changedFields:Field[] = Object.values(this.changes.fields);
+        const query:string = Tenent.queryGenerator.update.byTenentId(...changedFields);
+
+        const data:ITenentUpdateDataObj = this.changes.dataObj;
+        return this.execute(query,data);
+    }
 
     private async doExist():Promise<boolean>{
         const query:string = Tenent.queryGenerator.doExist();
@@ -59,12 +78,12 @@ export default class Tenent{
     ){
         this._schema = row.subject_schema;
         this._mfaDefault = row.mfa_enable_default;
-        this._mfaMethod = row.mfa_method;
         this._privateKeyCipher = row.private_key_cipher;
         this._publicKey = row.public_key;
         this._hasIpWhiteList = row.allow_ip_white_listing;
         this._maxSession = row.max_session;
         this._ipRateLimit = row.ip_rate_limit;
+        if(row.mfa_method === MfaMethod.email) this._mfaMethod = MfaMethod.email;
 
         if(
             row.store_logins            !== undefined &&
@@ -125,6 +144,15 @@ export default class Tenent{
         }
     }
 
+    public set schema(schema:Promise<SubjectSchema | null>){
+        schema
+        .then(schema=>{
+            this._schema = schema;
+            this.changes.fields.subjectSchema = Tenent.queryGenerator.writableFields.subjectSchema;
+            this.changes.dataObj.subjectSchema = schema;
+        });
+    }
+
     public get mfaDefault():Promise<boolean>{
         if(this._mfaDefault !== undefined){
             return Promise.resolve(this._mfaDefault);
@@ -134,6 +162,15 @@ export default class Tenent{
                 return this._mfaDefault!
             })
         }
+    }
+
+    public set mfaDefault(mfaDefault:Promise<boolean>){
+        mfaDefault
+        .then(mfaDefault=>{
+            this._mfaDefault = mfaDefault
+            this.changes.fields.mfaEnableDefault = Tenent.queryGenerator.writableFields.mfaEnableDefault;
+            this.changes.dataObj.mfaEnableDefault = mfaDefault;
+        });
     }
 
     public get mfaMethod():Promise<MfaMethod>{
@@ -146,6 +183,15 @@ export default class Tenent{
             })
         }
     }
+
+    public set mfaMethod(mfaMethod:Promise<MfaMethod>){
+        mfaMethod
+        .then(mfaMethod=>{
+            this._mfaMethod = mfaMethod;
+            this.changes.fields.mfaMethod = Tenent.queryGenerator.writableFields.mfaMethod;
+            this.changes.dataObj.mfaMethod = mfaMethod;
+        })
+    }
     
     public get publicKey():Promise<string>{
         if(this._publicKey !== undefined){
@@ -156,6 +202,15 @@ export default class Tenent{
                 return this._publicKey!
             });
         }
+    }
+
+    public set publicKey(publicKey:Promise<string>){
+        publicKey
+        .then(publicKey=>{
+            this._publicKey = publicKey;
+            this.changes.fields.publicKey = Tenent.queryGenerator.writableFields.publicKey;
+            this.changes.dataObj.publicKey = publicKey;
+        });
     }
     
     public get hasIpWhiteList():Promise<boolean>{
@@ -168,6 +223,15 @@ export default class Tenent{
             });
         }
     }
+
+    public set hasIpWhiteList(has:Promise<boolean>){
+        has
+        .then(has=>{
+            this._hasIpWhiteList = has;
+            this.changes.fields.allowIpWhiteListing = Tenent.queryGenerator.writableFields.allowIpWhieListing;
+            this.changes.dataObj.allowIpWhiteListing = has;
+        });
+    }
     
     public get maxSession():Promise<number>{
         if(this._maxSession !== undefined){
@@ -179,6 +243,15 @@ export default class Tenent{
             });
         }
     }
+
+    public set maxSession(ms:Promise<number>){
+        ms
+        .then(ms=>{
+            this._maxSession = ms;
+            this.changes.fields.maxSession = Tenent.queryGenerator.fields.maxSession;
+            this.changes.dataObj.maxSession = ms;
+        });
+    }
     
     public get ipRateLimit():Promise<number>{
         if(this._ipRateLimit !== undefined){
@@ -189,6 +262,15 @@ export default class Tenent{
                 return this._ipRateLimit!
             });
         }
+    }
+
+    public set ipRateLimit(irl:Promise<number>){
+        irl
+        .then(irl=>{
+            this._ipRateLimit = irl;
+            this.changes.fields.ipRateLimit = Tenent.queryGenerator.writableFields.ipRateLimit;
+            this.changes.dataObj.ipRateLimit = irl;
+        })
     }
     
     public get tenentStore():Promise<ITenentStore>{
@@ -291,7 +373,6 @@ export default class Tenent{
         ipRateLimit:number | null,
         schema:SubjectSchema | null
     ):Promise<Tenent>{
-        const secret = await getMySecret();
         const {publicKey , privateKey} = await generateKeys(); 
         const privateKeyCipher:string = await encryptText(privateKey);
 
@@ -317,7 +398,7 @@ export default class Tenent{
             tenent.execute = execute;
             const _tenentStore:ITenentStore = await tenent.tenentStore;
 
-            const tenentQG:TenentQG = new TenentQG(insertId);
+            const tenentQG:TenentQG = new Tenent.queryGenerator(insertId);
             const subjectQG:SubjectQG = tenentQG.getSubjectQG(_tenentStore);
             const tokenQG:TokenQG = tenentQG.getTokenQG(_tenentStore);
             const loginQG:LoginQG | null = tenentQG.getLoginsQG(_tenentStore);

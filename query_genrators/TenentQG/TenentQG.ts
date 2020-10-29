@@ -5,7 +5,9 @@ import StorageEngine from "../StorageEngineEnum";
 import Field from "../Field";
 import FieldCollection from '../FieldCollection';
 import SelectionCollection from "../SelectionCollection";
-import {pagination , insertString, defienetionString, constructSelect} from '../utils';
+import UpdateCollection from "../UpdateCollection";
+import DeleteCollection from "../DeletionCollection";
+import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
 
 import subjectCreatedAtDecorator from '../SubjectQG/CreatedAt'
 import subjectUpdatedAtDecorator from '../SubjectQG/UpdatedAt'
@@ -24,6 +26,7 @@ import SubjectQG from '../SubjectQG/SubjectQG';
 import TokenQG from '../TokenQG/TokenQG';
 import LoginsQG from '../LoginQG/LoginQG';
 import ITenentStore from "../../models/Tenent/ITenentStore";
+import constructDelete from "../utils/constructDelete";
 
 
 export default class TenentQG {
@@ -193,6 +196,38 @@ export default class TenentQG {
 
     }
 
+    static update:UpdateCollection = {
+
+        all : (...fields:Field[]):string => {
+            const condition:string = '';
+            const tableName:string = `tenents`;
+            return constructUpdate(fields,tableName,condition);
+        },
+
+        byTenentId : (...fields:Field[]):string => {
+            const condition:string = 'tenent_id = :tenentId';
+            const tableName:string = `tenents`;
+            return constructUpdate(fields,tableName,condition);
+        },
+
+    }
+
+    static delete:DeleteCollection = {
+
+        all : ():string => {
+            const condition:string = '';
+            const tableName:string = 'tenents';
+            return constructDelete(tableName,condition);
+        },
+
+        byTenentId : ():string => {
+            const condition:string = 'tenent_id = :tenentId';
+            const tableName:string = 'tenents';
+            return constructDelete(tableName,condition);
+        },
+
+    }
+
     // ===========================================
 
     constructor(
@@ -234,10 +269,10 @@ export default class TenentQG {
         return tokenQG;
     }
 
-    public getLoginsQG(tenentStore:ITenentStore):LoginsQG{
+    public getLoginsQG(tenentStore:ITenentStore):LoginsQG | null{
         let loginQG:LoginsQG = new LoginsQG(this.tenentId);
 
-        if(tenentStore.storeForLogins === false) throw new Error();
+        if(tenentStore.storeForLogins === false) return null;
 
         if(tenentStore.storeForLogins.loggedAt) loginQG = new loginTimeDecorator(loginQG);
         if(tenentStore.storeForLogins.deviceInfo)loginQG = new loginDeviceInfoDecorator(loginQG);

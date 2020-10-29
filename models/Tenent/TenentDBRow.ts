@@ -5,7 +5,7 @@ export default interface TenentDBRow{
     tenent_id?:number,
     subject_schema?:SubjectSchema | null,
     mfa_enable_default?:boolean,
-    mfa_method?:MfaMethod,
+    mfa_method?:string,
     private_key_cipher?:string,
     public_key?:string,
     allow_ip_white_listing?:boolean,
