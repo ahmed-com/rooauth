@@ -58,7 +58,11 @@ export default class Tenent{
         const query:string = Tenent.queryGenerator.update.byTenentId(...changedFields);
 
         const data:ITenentUpdateDataObj = this.changes.dataObj;
-        return this.execute(query,data);
+        return this.execute(query,data)
+        .then(()=>{
+            this.changes.dataObj = {};
+            this.changes.fields = {};
+        });
     }
 
     private async doExist():Promise<boolean>{
