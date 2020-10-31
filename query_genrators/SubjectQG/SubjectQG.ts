@@ -5,8 +5,8 @@ import SelectionCollection from "../SelectionCollection";
 import UpdateCollection from '../UpdateCollection';
 import DeletionCollection from '../DeletionCollection';
 import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
-import { table } from "console";
 import constructDelete from "../utils/constructDelete";
+import IQuery from "../IQuery";
 
 export default class SubjectQG{
 
@@ -25,7 +25,7 @@ export default class SubjectQG{
         private tenentId:number
     ){
 
-        this.enableMfa_default = `(SELECT tenents.mfa_enable_default FROM tenents WHERE tenents.tenent_id = ${this.tenentId} LIMIT 1)`;
+        this.enableMfa_default = `(SELECT tenents.mfaDefault FROM tenents WHERE tenents.tenentId = ${this.tenentId} LIMIT 1)`;
         this.accountVerified_default = 'FALSE';
 
         this.fields = {
@@ -44,37 +44,37 @@ export default class SubjectQG{
             },
 
             passwordHash :{
-                name : 'password_hash',
-                definetion:'password_hash VARCHAR(255) NOT NULL',
+                name : 'passwordHash',
+                definetion:'passwordHash VARCHAR(255) NOT NULL',
                 insertionValue:':passwordHash',
                 updateValue:':passwordHash'
             },
 
             oldPasswordHash : {
-                name : 'old_password_hash',
-                definetion : 'old_password_hash VARCHAR(255) NULL',
+                name : 'oldPasswordHash',
+                definetion : 'oldPasswordHash VARCHAR(255) NULL',
                 insertionValue : ':oldPasswordHash',
                 updateValue : ':oldPasswordHash'
             },
 
             passwordChangedAt : {
-                name : 'password_changed_at',
-                definetion : 'password_changed_at DATETIME NULL',
+                name : 'passwordChangedAt',
+                definetion : 'passwordChangedAt DATETIME NULL',
                 insertionValue : ':passwordChangedAt',
                 updateValue : ':passwordChangedAt'
             },
 
             enableMfa : {
-                name : 'enable_mfa',
-                definetion : 'enable_mfa BOOLEAN NOT NULL',
+                name : 'enableMfa',
+                definetion : 'enableMfa BOOLEAN NOT NULL',
                 default : this.enableMfa_default,
                 insertionValue : `IFNULL(:enableMfa,${this.enableMfa_default})`,
                 updateValue : ':enableMfa'
             },
 
             accountVerified : {
-                name: 'account_verified',
-                definetion : `account_verified BOOLEAN NOT NULL DEFAULT ${this.accountVerified_default}`,
+                name: 'accountVerified',
+                definetion : `accountVerified BOOLEAN NOT NULL DEFAULT ${this.accountVerified_default}`,
                 default : this.accountVerified_default,
                 insertionValue : `IFNULL(:accountVerified,${this.accountVerified_default})`,
                 updateValue : ':accountVerified'
@@ -91,66 +91,75 @@ export default class SubjectQG{
 
         this.select = {
 
-            all : (ignorePagination:boolean,...fields:Field[]):string=>{
+            all : (ignorePagination:boolean,...fields:Field[]):IQuery=>{
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+                const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
+                return {queryStr , queryData : {}};
             },
 
-            byId : (_:boolean,...fields:Field[]):string=>{
+            byId : (_:boolean,id:number,...fields:Field[]):IQuery=>{
                 const condition:string = 'id = :id';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                return constructSelect(fields,tableName,condition,"LIMIT 1");
+                const queryStr:string = constructSelect(fields,tableName,condition,"LIMIT 1");
+                return {queryStr , queryData : {id}};
             },
 
-            byAccount : (_:boolean,...fields:Field[]):string=>{
+            byAccount : (_:boolean,account:string,...fields:Field[]):IQuery=>{
                 const condition:string = 'account = :account';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                return constructSelect(fields,tableName,condition,"LIMIT 1");
+                const queryStr:string = constructSelect(fields,tableName,condition,"LIMIT 1");
+                return {queryStr , queryData : {account}};
             }
 
         }
 
         this.update = {
 
-            all : (...fields:Field[]):string=>{
+            all : (...fields:Field[]):IQuery=>{
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                return constructUpdate(fields,tableName,condition);
+                const queryStr:string = constructUpdate(fields,tableName,condition);
+                return {queryStr , queryData : {}};
             },
 
-            byId : (...fields:Field[]):string=>{
+            byId : (id:number,...fields:Field[]):IQuery=>{
                 const condition:string = 'id = :id';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                return constructUpdate(fields,tableName,condition);
+                const queryStr:string = constructUpdate(fields,tableName,condition);
+                return {queryStr , queryData : {id}};
             },
 
-            byAccount : (...fields:Field[]):string=>{
+            byAccount : (account:string,...fields:Field[]):IQuery=>{
                 const condition:string = 'account = :account';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                return constructUpdate(fields,tableName,condition);
+                const queryStr:string = constructUpdate(fields,tableName,condition);
+                return {queryStr , queryData : {account}};
             },
 
         },
 
         this.delete = {
 
-            all : ():string=>{
+            all : ():IQuery=>{
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                return constructDelete(tableName,condition);
+                const queryStr:string = constructDelete(tableName,condition);
+                return {queryStr , queryData : {}};
             },
             
-            byId : ():string=>{
+            byId : (id:number):IQuery=>{
                 const condition:string = 'id = :id';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                return constructDelete(tableName,condition);
+                const queryStr:string = constructDelete(tableName,condition);
+                return {queryStr , queryData : {id}};
             },
             
-            byAccount : ():string=>{
+            byAccount : (account:string):IQuery=>{
                 const condition:string = 'account = :account';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                return constructDelete(tableName,condition);
+                const queryStr:string = constructDelete(tableName,condition);
+                return {queryStr , queryData : {account}};
             },
             
         }
@@ -161,30 +170,20 @@ export default class SubjectQG{
         return this.tenentId;
     }
 
-    public createTable(engine:StorageEngine):string{
+    public createTable(engine:StorageEngine):IQuery{
         const fieldsString:string = defienetionString(this.fields);
-
-        return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}subjects (
+        const queryStr:string = `CREATE TABLE IF NOT EXISTS tno${this.tenentId}subjects (
             ${fieldsString},
             PRIMARY KEY (id)
-        ) ENGINE=${engine};`;
+        ) ENGINE=${engine};`
+
+        return {queryStr, queryData : {}};
     }
 
-    public insertSubject():string{
-        return insertString (this.fields,`tno${this.tenentId}subjects`)
+    public insertSubject(data:object):IQuery{
+        const queryStr:string = insertString (this.fields,`tno${this.tenentId}subjects`);
+
+        return {queryStr , queryData : data};
     }
 
-    /**
-     * @deprecated
-     */
-    public enableMfaByDefaul():string{
-        return `ALTER TABLE tno${this.tenentId}subjects ALTER enable_mfa SET DEFAULT TRUE;`
-    }
-
-    /**
-     * @deprecated
-     */
-    public disableMfaByDefault():string{
-        return `ALTER TABLE tno${this.tenentId}subjects ALTER enable_mfa SET DEFAULT FALSE;`
-    }
 }

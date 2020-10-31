@@ -27,6 +27,7 @@ import TokenQG from '../TokenQG/TokenQG';
 import LoginsQG from '../LoginQG/LoginQG';
 import ITenentStore from "../../models/Tenent/ITenentStore";
 import constructDelete from "../utils/constructDelete";
+import IQuery from "../IQuery";
 
 
 export default class TenentQG {
@@ -57,109 +58,109 @@ export default class TenentQG {
     static fields:FieldCollection = {
 
         tenentId : {
-            name : 'tenent_id',
+            name : 'tenentId',
             insertionValue: 'DEFAULT',
-            definetion : 'tenent_id INTEGER UNSIGNED NOT NULL UNIQUE auto_increment',
+            definetion : 'tenentId INTEGER UNSIGNED NOT NULL UNIQUE auto_increment',
             updateValue : ':tenentId'
         },
 
         subjectSchema : {
-            name : 'subject_schema',
-            definetion : 'subject_schema JSON NULL',
+            name : 'subjectSchema',
+            definetion : 'subjectSchema JSON NULL',
             insertionValue : ':subjectSchema',
             updateValue : ':subjectSchema'
         },
 
-        mfaEnableDefault : {
-            name : 'mfa_enable_default',
-            definetion : `mfa_enable_default BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultMfaDefault}`,
+        mfaDefault : {
+            name : 'mfaDefault',
+            definetion : `mfaDefault BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultMfaDefault}`,
             default : `${TenentQG.defaultMfaDefault}`,
-            insertionValue : `IFNULL(:mfaEnableDefault,${TenentQG.defaultMfaDefault})`,
-            updateValue : `:mfaEnableDefault`            
+            insertionValue : `IFNULL(:mfaDefault,${TenentQG.defaultMfaDefault})`,
+            updateValue : `:mfaDefault`            
         },
 
         mfaMethod : {
-            name : 'mfa_method',
-            definetion : `mfa_method VARCHAR (64) NOT NULL DEFAULT ${TenentQG.defaultMfaMethod}`,
+            name : 'mfaMethod',
+            definetion : `mfaMethod VARCHAR (64) NOT NULL DEFAULT ${TenentQG.defaultMfaMethod}`,
             default : TenentQG.defaultMfaMethod,
             insertionValue : `IFNULL(:mfaMethod,${TenentQG.defaultMfaMethod})`,
             updateValue : ':mfaMethod'
         },
 
         privateKeyCipher : {
-            name : 'private_key_cipher',
-            definetion : `private_key_cipher VARCHAR(${TenentQG.privateKeyLength})`,
+            name : 'privateKeyCipher',
+            definetion : `privateKeyCipher VARCHAR(${TenentQG.privateKeyLength})`,
             insertionValue : ':privateKeyCipher',
             updateValue : ':privateKeyCipher'
         },
 
         publicKey : {
-            name : 'public_key',
-            definetion : `public_key VARCHAR(${TenentQG.publicKeyLength})`,
+            name : 'publicKey',
+            definetion : `publicKey VARCHAR(${TenentQG.publicKeyLength})`,
             insertionValue : ':publicKey',
             updateValue : ':publicKey'
         },
 
-        allowIpWhiteListing : {
-            name : 'allow_ip_white_listing',
-            definetion : `allow_ip_white_listing BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultIpWhiteListing}`,
+        hasIpWhiteList : {
+            name : 'hasIpWhiteList',
+            definetion : `hasIpWhiteList BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultIpWhiteListing}`,
             default : `${TenentQG.defaultIpWhiteListing}`,
-            insertionValue : `IFNULL(:allowIpWhiteListing,${TenentQG.defaultIpWhiteListing})`,
-            updateValue : ':allowIpWhiteListing'
+            insertionValue : `IFNULL(:hasIpWhiteList,${TenentQG.defaultIpWhiteListing})`,
+            updateValue : ':hasIpWhiteList'
         },
 
         storeLogins : {
-            name : 'store_logins',
-            definetion : `store_logins BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreLogins}`,
+            name : 'storeLogins',
+            definetion : `storeLogins BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreLogins}`,
             default : `${TenentQG.defaultStoreLogins}`,
             insertionValue : `IFNULL(:storeLogins,${TenentQG.defaultStoreLogins})`,
             updateValue : ':storeLogins'
         },
 
         storeLoginTime : {
-            name : 'store_login_time',
-            definetion : `store_login_time BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreLoginTime}`,
+            name : 'storeLoginTime',
+            definetion : `storeLoginTime BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreLoginTime}`,
             default : `${TenentQG.defaultStoreLoginTime}`,
             insertionValue : `IFNULL(:storeLoginTime,${TenentQG.defaultStoreLoginTime})`,
             updateValue : ':storeLoginTime'
         },
 
         storeLoginDeviceInfo : {
-            name : 'store_login_device_info',
-            definetion : `store_login_device_info BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreLoginDeviceInfo}`,
+            name : 'storeLoginDeviceInfo',
+            definetion : `storeLoginDeviceInfo BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreLoginDeviceInfo}`,
             default : `${TenentQG.defaultStoreLoginDeviceInfo}`,
             insertionValue : `IFNULL(:storeLoginDeviceInfo,${TenentQG.defaultStoreLoginDeviceInfo})`,
             updateValue : ':storeLoginDeviceInfo'
         },
 
-        storeCreatedAt : {
-            name : 'store_created_at',
-            definetion : `store_created_at BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreCreatedAt}`,
+        storeSubjectCreatedAt : {
+            name : 'storeSubjectCreatedAt',
+            definetion : `storeSubjectCreatedAt BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreCreatedAt}`,
             default : `${TenentQG.defaultStoreCreatedAt}`,
-            insertionValue : `IFNULL(:storeCreatedAt,${TenentQG.defaultStoreCreatedAt})`,
-            updateValue : ':storeCreatedAt'
+            insertionValue : `IFNULL(:storeSubjectCreatedAt,${TenentQG.defaultStoreCreatedAt})`,
+            updateValue : ':storeSubjectCreatedAt'
         },
 
-        storeUpdatedAt : {
-            name : 'store_updated_at',
-            definetion : `store_updated_at BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreUpdatedAt}`,
+        storeSubjectUpdatedAt : {
+            name : 'storeSubjectUpdatedAt',
+            definetion : `storeSubjectUpdatedAt BOOLEAN NOT NULL DEFAULT ${TenentQG.defaultStoreUpdatedAt}`,
             default : `${TenentQG.defaultStoreUpdatedAt}`,
-            insertionValue : `IFNULL(:storeUpdateddAt,${TenentQG.defaultStoreUpdatedAt})`,
-            updateValue : ':storeUpdatedAt'
+            insertionValue : `IFNULL(:storeSubjectUpdateddAt,${TenentQG.defaultStoreUpdatedAt})`,
+            updateValue : ':storeSubjectUpdatedAt'
         },
 
         maxSession : {
-            name : 'max_session',
-            definetion : `max_session INTEGER NOT NULL DEFAULT ${TenentQG.defaultMaxSession}`,
+            name : 'maxSession',
+            definetion : `maxSession INTEGER NOT NULL DEFAULT ${TenentQG.defaultMaxSession}`,
             insertionValue : `IFNULL(:maxSession,${TenentQG.defaultMaxSession})`,
             default : `${TenentQG.defaultMaxSession}`,
             updateValue : ':maxSession'
         },
 
         ipRateLimit : {
-            name : 'ip_rate_limit',
+            name : 'ipRateLimit',
             default : `${TenentQG.defaultIpRateLimit}`,
-            definetion : `ip_rate_limit INTEGER NOT NULL DEFAULT ${TenentQG.defaultIpRateLimit}`,
+            definetion : `ipRateLimit INTEGER NOT NULL DEFAULT ${TenentQG.defaultIpRateLimit}`,
             insertionValue : `IFNULL(:ipRateLimit,${TenentQG.defaultIpRateLimit})`,
             updateValue : ':ipRateLimit'
         }
@@ -182,48 +183,54 @@ export default class TenentQG {
 
     static select:SelectionCollection = {
 
-        all : (ignorePagination:boolean,...fields:Field[]):string=>{
+        all : (ignorePagination:boolean,...fields:Field[]):IQuery=>{
             const condition:string = '';
             const tableName:string = `tenents`;
-            return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            return {queryStr , queryData : {}};
         },
 
-        byTenentId : (_:boolean,...fields:Field[]):string=>{
-            const condition:string = 'tenent_id = :tenentId';
+        byTenentId : (_:boolean,tenentId:number,...fields:Field[]):IQuery=>{
+            const condition:string = 'tenentId = :tenentId';
             const tableName:string = `tenents`;
-            return constructSelect(fields,tableName,condition,"LIMIT 1;");
+            const queryStr:string = constructSelect(fields,tableName,condition," LIMIT 1 ");
+            return {queryStr , queryData :{tenentId}};
         },
 
     }
 
     static update:UpdateCollection = {
 
-        all : (...fields:Field[]):string => {
+        all : (...fields:Field[]):IQuery => {
             const condition:string = '';
             const tableName:string = `tenents`;
-            return constructUpdate(fields,tableName,condition);
+            const queryStr:string = constructUpdate(fields,tableName,condition);
+            return {queryStr , queryData : {}};
         },
 
-        byTenentId : (...fields:Field[]):string => {
-            const condition:string = 'tenent_id = :tenentId';
+        byTenentId : (tenentId:number,...fields:Field[]):IQuery => {
+            const condition:string = 'tenentId = :tenentId';
             const tableName:string = `tenents`;
-            return constructUpdate(fields,tableName,condition);
+            const queryStr:string = constructUpdate(fields,tableName,condition);
+            return {queryStr , queryData : {tenentId}};
         },
 
     }
 
     static delete:DeleteCollection = {
 
-        all : ():string => {
+        all : ():IQuery => {
             const condition:string = '';
             const tableName:string = 'tenents';
-            return constructDelete(tableName,condition);
+            const queryStr:string = constructDelete(tableName,condition);
+            return {queryStr , queryData : {}};
         },
 
-        byTenentId : ():string => {
-            const condition:string = 'tenent_id = :tenentId';
+        byTenentId : (tenentId:number):IQuery => {
+            const condition:string = 'tenentId = :tenentId';
             const tableName:string = 'tenents';
-            return constructDelete(tableName,condition);
+            const queryStr:string = constructDelete(tableName,condition);
+            return {queryStr , queryData : {tenentId}};
         },
 
     }
@@ -238,17 +245,20 @@ export default class TenentQG {
         return this.tenentId;
     }
 
-    static createTable(engine:StorageEngine):string{
+    static createTable(engine:StorageEngine):IQuery{
         const fieldsString:string = defienetionString(TenentQG.fields);
-
-        return `CREATE TABLE IF NOT EXISTS tenents (
+        const queryStr:string = `CREATE TABLE IF NOT EXISTS tenents (
             ${fieldsString},
-            PRIMARY KEY (tenent_id)
+            PRIMARY KEY (tenentId)
         )ENGINE=${engine};`;
+
+        return {queryStr , queryData : {}};
     }
 
-    static insertTenent():string{
-        return insertString (TenentQG.fields,`tenents`);
+    static insertTenent(data:object):IQuery{
+        const queryStr:string = insertString (TenentQG.fields,`tenents`);
+
+        return {queryStr , queryData : data};
     }
 
     public getSubjectQG(tenentStore:ITenentStore):SubjectQG{
@@ -280,7 +290,10 @@ export default class TenentQG {
         return loginQG;
     }
 
-    public static doExist():string{
-        return `SELECT EXISTS( SELECT tenent_id FROM tenents WHERE tenent_id = :tenentId LIMIT 1 ) AS exists;`
+    public doExist():IQuery{
+        const tenentId:number = this.id;
+        const queryStr:string = `SELECT EXISTS( SELECT tenentId FROM tenents WHERE tenentId = :tenentId LIMIT 1 ) AS exists;`
+
+        return {queryStr , queryData : {tenentId}};
     }
 }

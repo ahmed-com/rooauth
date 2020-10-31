@@ -6,36 +6,36 @@ import DeleteCollection from '../DeletionCollection';
 import StorageEngine from "../StorageEngineEnum";
 import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
 import constructDelete from "../utils/constructDelete";
-import { table } from "console";
+import IQuery from "../IQuery";
 
 export default class ClientQG{
 
     static fields:FieldCollection = {
 
         clientId : {
-            name : 'client_id',
-            definetion : 'client_id INTEGER UNSIGNED NOT NULL UNIQUE auto_increment',
+            name : 'clientId',
+            definetion : 'clientId INTEGER UNSIGNED NOT NULL UNIQUE auto_increment',
             insertionValue : 'DEFAULT',
             updateValue : ':clientId'
         },
 
         clientSecret : {
-            name : 'client_secret',
-            definetion : 'client_secret VARCHAR(255) NOT NULL',
+            name : 'clientSecret',
+            definetion : 'clientSecret VARCHAR(255) NOT NULL',
             insertionValue : ':clientId',
             updateValue : ':clientId'
         },
 
         userId : {
-            name : 'user_id',
-            definetion : 'user_id INTEGER UNSIGNED NOT NULL',
+            name : 'userId',
+            definetion : 'userId INTEGER UNSIGNED NOT NULL',
             insertionValue : ':userId',
             updateValue : ':userId'
         },
 
         tenentId : {
-            name : 'tenent_id',
-            definetion : 'tenent_id INTEGER UNSIGNED NOT NULL',
+            name : 'tenentId',
+            definetion : 'tenentId INTEGER UNSIGNED NOT NULL',
             insertionValue : ':tenentId',
             updateValue : ':tenentId'
         }
@@ -52,99 +52,114 @@ export default class ClientQG{
 
     static select:SelectionCollection = {
 
-        all : (ignorePagination:boolean,...fields:Field[]):string=>{
+        all : (ignorePagination:boolean,...fields:Field[]):IQuery=>{
             const condition:string = '';
             const tableName:string = `clients`;
-            return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            return {queryStr,queryData : {}}
         },
 
-        byClientId : (_:boolean,...fields:Field[]):string=>{
-            const condition:string = 'client_id = :clientId';
+        byClientId : (_:boolean,clientId:number,...fields:Field[]):IQuery=>{
+            const condition:string = 'clientId = :clientId';
             const tableName:string = `clients`;
-            return constructSelect(fields,tableName,condition,"LIMIT 1;");
+            const queryStr:string = constructSelect(fields,tableName,condition,"LIMIT 1;");
+            return {queryStr , queryData : {clientId}};
         },
 
-        byTenentId : (ignorePagination:boolean,...fields:Field[]):string=>{
-            const condition:string = 'tenent_id = :tenentId';
+        byTenentId : (ignorePagination:boolean,tenentId,...fields:Field[]):IQuery=>{
+            const condition:string = 'tenentId = :tenentId';
             const tableName:string = `clients`;
-            return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            return {queryStr , queryData : {tenentId}}
         },
 
-        byUserId : (ignorePagination:boolean,...fields:Field[]):string=>{
-            const condition:string = 'user_id = :userId';
+        byUserId : (ignorePagination:boolean,userId:number,...fields:Field[]):IQuery=>{
+            const condition:string = 'userId = :userId';
             const tableName:string = `clients`;
-            return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            return {queryStr , queryData : {userId}}
         }
 
     }
 
     static update:UpdateCollection = {
 
-        all : (...fields:Field[]) => {
+        all : (...fields:Field[]):IQuery => {
             const condition:string = '';
             const tableName:string = 'clients';
-            return constructUpdate(fields,tableName,condition);
+            const queryStr:string = constructUpdate(fields,tableName,condition);
+            return {queryStr , queryData : {}};
         },
 
-        byClientId : (...fields:Field[]) => {
-            const condition:string = ' client_id = :clientId ';
+        byClientId : (clientId:number,...fields:Field[]):IQuery => {
+            const condition:string = ' clientId = :clientId ';
             const tableName:string = 'clients';
-            return constructUpdate(fields,tableName,condition);
+            const queryStr:string = constructUpdate(fields,tableName,condition);
+            return {queryStr , queryData : {clientId}};
         },
 
-        byTenentId : (...fields:Field[]) => {
-            const condition:string = ' tenent_id = :tenentId ';
+        byTenentId : (tenentId:number,...fields:Field[]):IQuery => {
+            const condition:string = ' tenentId = :tenentId ';
             const tableName:string = 'clients';
-            return constructUpdate(fields,tableName,condition);
+            const queryStr:string = constructUpdate(fields,tableName,condition);
+            return {queryStr , queryData : {tenentId}};
         },
 
-        byUserId : (...fields:Field[]) => {
-            const condition:string = ' user_id = :userId ';
+        byUserId : (userId:number,...fields:Field[]) => {
+            const condition:string = ' userId = :userId ';
             const tableName:string = 'clients';
-            return constructUpdate(fields,tableName,condition);
+            const queryStr:string = constructUpdate(fields,tableName,condition);
+            return {queryStr , queryData : {userId}};
         }
 
     }
 
     static delete:DeleteCollection = {
 
-        all : () => {
+        all : ():IQuery => {
             const condition:string = '';
             const tableName:string = 'clients';
-            return constructDelete(tableName,condition);
+            const queryStr:string = constructDelete(tableName,condition);
+            return {queryStr , queryData : {}};
         },
 
-        byClientId : () => {
-            const condition:string = 'client_id = :clientId';
+        byClientId : (clientId:number):IQuery => {
+            const condition:string = 'clientId = :clientId';
             const tableName:string = 'clients';
-            return constructDelete(tableName,condition);
+            const queryStr:string = constructDelete(tableName,condition);
+            return {queryStr , queryData : {clientId}};
         },
 
-        byTenentId : () => {
-            const condition:string = 'tenent_id = :tenentId';
+        byTenentId : (tenentId:number):IQuery => {
+            const condition:string = 'tenentId = :tenentId';
             const tableName:string = 'clients';
-            return constructDelete(tableName,condition);
+            const queryStr:string = constructDelete(tableName,condition);
+            return {queryStr , queryData : {tenentId}};
         },
 
-        byUserId : () => {
-            const condition:string = 'user_id = :userId';
+        byUserId : (userId:number):IQuery => {
+            const condition:string = 'userId = :userId';
             const tableName:string = 'clients';
-            return constructDelete(tableName,condition);
+            const queryStr:string = constructDelete(tableName,condition);
+            return {queryStr , queryData : {userId}};
         }
 
     }
 
-    public static createTable(engine:StorageEngine):string{
+    public static createTable(engine:StorageEngine):IQuery{
         const fieldsString:string = defienetionString(ClientQG.fields);
-
-        return `CREATE TABLE IF NOT EXISTS clients(
+        const queryStr:string = `CREATE TABLE IF NOT EXISTS clients(
             ${fieldsString},
-            FOREIGN KEY (tenent_id) REFERENCES tenents(tenent_id) ON DELETE CASCADE ON UPDATE CASCADE
+            FOREIGN KEY (tenentId) REFERENCES tenents(tenentId) ON DELETE CASCADE ON UPDATE CASCADE
         )ENGINE=${engine};`
+
+        return {queryStr , queryData:{}};
     }
 
-    public static insertClient():string{
-        return insertString (ClientQG.fields,`clients`);
+    public static insertClient(data:object):IQuery{
+        const queryStr:string = insertString (ClientQG.fields,`clients`);
+
+        return {queryStr , queryData : data};
     }
 
 }

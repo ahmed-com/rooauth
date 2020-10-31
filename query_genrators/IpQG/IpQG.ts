@@ -3,6 +3,7 @@ import FieldCollection from '../FieldCollection';
 import SelectionCollection from "../SelectionCollection";
 import StorageEngine from "../StorageEngineEnum";
 import {pagination , insertString, defienetionString, constructSelect} from '../utils';
+import IQuery from "../IQuery";
 
 export default class IpQG{
 
@@ -16,8 +17,8 @@ export default class IpQG{
         },
 
         tenentId : {
-            name : 'tenent_id',
-            definetion : 'tenent_id INTEGER UNSIGNED NOT NULL',
+            name : 'tenentId',
+            definetion : 'tenentId INTEGER UNSIGNED NOT NULL',
             insertionValue : ':tenentId',
             updateValue : ':tenentId'
         }
@@ -34,25 +35,29 @@ export default class IpQG{
 
     static select:SelectionCollection = {
 
-        byTenentId : (ignorePagination:boolean,...fields:Field[]):string=>{
-            const condition:string = 'tenent_id = :tenentId';
+        byTenentId : (ignorePagination:boolean,tenentId:number,...fields:Field[]):IQuery=>{
+            const condition:string = 'tenentId = :tenentId';
             const tableName:string = `ips`;
-            return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
+            return {queryStr , queryData : {tenentId}}
         }
 
     }
 
-    public static createTable(engine:StorageEngine):string{
+    public static createTable(engine:StorageEngine):IQuery{
         const fieldsString:string = defienetionString(IpQG.fields);
-
-        return `CREATE TABLE IF NOT EXISTS ips(
+        const queryStr:string = `CREATE TABLE IF NOT EXISTS ips(
             ${fieldsString}
-            FOREIGN KEY (tenent_id) REFERENCES tenents(tenent_id) ON DELETE CASCADE ON UPDATE CASCADE
+            FOREIGN KEY (tenentId) REFERENCES tenents(tenentId) ON DELETE CASCADE ON UPDATE CASCADE
         )ENGINE=${engine};`;
+
+        return {queryStr , queryData : {}};
     }
 
-    public static insertIp():string{
-        return insertString (IpQG.fields,`ips`);
+    public static insertIp(data:object):IQuery{
+        const queryStr:string = insertString (IpQG.fields,`ips`);
+
+        return {queryStr , queryData : data};
     }
 
 }

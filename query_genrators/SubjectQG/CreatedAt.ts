@@ -2,6 +2,7 @@ import Field from '../Field';
 import SubjectQG from './SubjectQG';
 import { constructSelect, constructUpdate, pagination } from '../utils';
 import constructDelete from '../utils/constructDelete';
+import IQuery from '../IQuery';
 
 export default class CreatedAt extends SubjectQG{
 
@@ -11,9 +12,9 @@ export default class CreatedAt extends SubjectQG{
         const decoratorDefault:string = 'NOW()';
         const decoratorField:Field = {
             default : decoratorDefault,
-            name : 'created_at',
+            name : 'createdAt',
             insertionValue : `IFNULL(:createdAt,${decoratorDefault})`,
-            definetion : `created_at DATETIME NOT NULL DEFAULT ${decoratorDefault}`,
+            definetion : `createdAt DATETIME NOT NULL DEFAULT ${decoratorDefault}`,
             updateValue : ':createdAt'
         }
 
@@ -41,39 +42,45 @@ export default class CreatedAt extends SubjectQG{
 
     }
 
-    private selectSubjectCreatedAfterDate(ignorePagination:boolean,...fields:Field[]):string{
-        const condition:string = 'created_at > :createdAt';
+    private selectSubjectCreatedAfterDate(ignorePagination:boolean,date:Date,...fields:Field[]):IQuery{
+        const condition:string = 'createdAt > :date';
         const tableName:string = `tno${this.id}subject`;
-        return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+        const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
+        return {queryStr , queryData : {date}}
     }
 
-    private selectSubjectCreatedBeforeDate(ignorePagination:boolean,...fields:Field[]):string{
-        const condition:string = 'created_at < :createdAt';
+    private selectSubjectCreatedBeforeDate(ignorePagination:boolean,date:Date,...fields:Field[]):IQuery{
+        const condition:string = 'createdAt < :date';
         const tableName:string = `tno${this.id}subject`;
-        return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+        const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
+        return {queryStr , queryData : {date}}
     }
 
-    private updateSubjectCreatedAfterDate(...fields:Field[]):string{
-        const condition:string = 'created_at > :createdAt';
+    private updateSubjectCreatedAfterDate(date:Date,...fields:Field[]):IQuery{
+        const condition:string = 'createdAt > :date';
         const tableName:string = `tno${this.id}subject`;
-        return constructUpdate(fields,tableName,condition);
+        const queryStr:string = constructUpdate(fields,tableName,condition);
+        return {queryStr , queryData : {date}};
     }
 
-    private updateSubjectCreatedBeforeDate(...fields:Field[]):string{
-        const condition:string = 'created_at < :createdAt';
+    private updateSubjectCreatedBeforeDate(date:Date,...fields:Field[]):IQuery{
+        const condition:string = 'createdAt < :date';
         const tableName:string = `tno${this.id}subject`;
-        return constructUpdate(fields,tableName,condition);
+        const queryStr:string = constructUpdate(fields,tableName,condition);
+        return {queryStr , queryData : {date}};
     }
 
-    private deleteSubjectCreatedAfterDate():string{
-        const condition:string = 'created_at > :createdAt';
+    private deleteSubjectCreatedAfterDate(date:Date):IQuery{
+        const condition:string = 'createdAt > :date';
         const tableName:string = `tno${this.id}subject`;
-        return constructDelete(tableName,condition);
+        const queryStr:string = constructDelete(tableName,condition);
+        return {queryStr , queryData : {date}};
     }
 
-    private deleteSubjectCreatedBeforeDate():string{
-        const condition:string = 'created_at < :createdAt';
+    private deleteSubjectCreatedBeforeDate(date:Date):IQuery{
+        const condition:string = 'createdAt < :date';
         const tableName:string = `tno${this.id}subject`;
-        return constructDelete(tableName,condition);
+        const queryStr:string = constructDelete(tableName,condition);
+        return {queryStr , queryData : {date}};
     }
 }

@@ -1,6 +1,7 @@
 import Field from '../Field';
 import LoginQG from './LoginQG';
 import { constructSelect, pagination } from '../utils';
+import IQuery from '../IQuery';
 
 export default class LoggedAt extends LoginQG{
 
@@ -10,8 +11,8 @@ export default class LoggedAt extends LoginQG{
         const decoratorDefault:string = 'NOW()';
         const decoratorField:Field = {
             default : decoratorDefault,
-            definetion : `logged_at DATETIME NOT NULL DEFAULT ${decoratorDefault}`,
-            name : "logged_at",
+            definetion : `loggedAt DATETIME NOT NULL DEFAULT ${decoratorDefault}`,
+            name : "loggedAt",
             insertionValue : `IFNULL(:loggedAt,${decoratorDefault})`,
             updateValue : ':loggedAt'
         };
@@ -26,15 +27,17 @@ export default class LoggedAt extends LoginQG{
         }
     }
 
-    private selectLoginsAfterDate(ignorePagination:boolean,...fields:Field[]):string{
-        const condition:string = 'logged_at > :date';
+    private selectLoginsAfterDate(ignorePagination:boolean,date:Date,...fields:Field[]):IQuery{
+        const condition:string = 'loggedAt > :date';
         const tableName:string = `tno${this.id}logins`;
-        return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+        const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
+        return {queryStr, queryData : {date}};
     }
 
-    private selectLoginsBeforeDate(ignorePagination:boolean,...fields:Field[]):string{
-        const condition:string = 'logged_at < :date';
+    private selectLoginsBeforeDate(ignorePagination:boolean,date:Date,...fields:Field[]):IQuery{
+        const condition:string = 'loggedAt < :date';
         const tableName:string = `tno${this.id}logins`;
-        return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+        const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
+        return {queryStr , queryData : {date}};
     }
 }
