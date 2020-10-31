@@ -27,17 +27,19 @@ export default class LoggedAt extends LoginQG{
         }
     }
 
-    private selectLoginsAfterDate(ignorePagination:boolean,date:Date,...fields:Field[]):IQuery{
+    private selectLoginsAfterDate(queryData:{date:Date, limit?:number, offset?:number},...fields:Field[]):IQuery{
         const condition:string = 'loggedAt > :date';
         const tableName:string = `tno${this.id}logins`;
-        const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-        return {queryStr, queryData : {date}};
+        const paginationStr:string = pagination(queryData);
+        const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+        return {queryStr, queryData };
     }
 
-    private selectLoginsBeforeDate(ignorePagination:boolean,date:Date,...fields:Field[]):IQuery{
+    private selectLoginsBeforeDate(queryData:{date:Date, limit?:number, offset?:number},...fields:Field[]):IQuery{
         const condition:string = 'loggedAt < :date';
         const tableName:string = `tno${this.id}logins`;
-        const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-        return {queryStr , queryData : {date}};
+        const paginationStr:string = pagination(queryData);
+        const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+        return {queryStr , queryData };
     }
 }

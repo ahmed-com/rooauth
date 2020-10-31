@@ -69,39 +69,44 @@ export default class LoginQG{
 
         this.select = {
 
-            all : (ignorePagination:boolean,...fields:Field[]):IQuery=>{
+            all : (queryData:{limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}logins`;
-                const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-                return {queryStr , queryData : {}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            bySubject : (ignorePagination:boolean,subjectId:number,...fields:Field[]):IQuery=>{
+            bySubject : (queryData:{subjectId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'subjectId = :subjectId';
                 const tableName:string = `tno${this.tenentId}logins`;
-                const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-                return {queryStr , queryData : {subjectId}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            byIp : (ignorePagination:boolean,ip:string,...fields:Field[]):IQuery=>{
+            byIp : (queryData:{ip:string, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'ip = :ip';
                 const tableName:string = `tno${this.tenentId}logins`;
-                const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-                return {queryStr , queryData : {ip}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            byJti : (ignorePagination:boolean,jti:string,...fields:Field[]):IQuery=>{
+            byJti : (queryData:{jti:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'jti = :jti';
                 const tableName:string = `tno${this.tenentId}logins`;
-                const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-                return {queryStr , queryData : {jti}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            byClientId : (ignorePagination:boolean,clientId:number,...fields:Field[]):IQuery=>{
+            byClientId : (queryData:{clientId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'clientId = :clientId';
                 const tableName:string = `tno${this.tenentId}logins`;
-                const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-                return {queryStr , queryData : {clientId}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             }
         }
 
@@ -130,9 +135,9 @@ export default class LoginQG{
         return {queryStr , queryData : {}};
     }
 
-    public insertLogin(data:object):IQuery{
+    public insertLogin(queryData:object):IQuery{
         const queryStr:string = insertString(this.fields,`tno${this.tenentId}logins`);;
 
-        return {queryStr,queryData : data};
+        return {queryStr,queryData };
     }
 }
