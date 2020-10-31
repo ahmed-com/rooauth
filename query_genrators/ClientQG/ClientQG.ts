@@ -52,96 +52,104 @@ export default class ClientQG{
 
     static select:SelectionCollection = {
 
-        all : (ignorePagination:boolean,...fields:Field[]):IQuery=>{
+        all : (queryData:{limit?:number, offset?:number},...fields:Field[]):IQuery=>{
             const condition:string = '';
             const tableName:string = `clients`;
-            const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-            return {queryStr,queryData : {}}
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+            return {queryStr,queryData}
         },
 
-        byClientId : (_:boolean,clientId:number,...fields:Field[]):IQuery=>{
+        byClientId : (queryData:{clientId:number,limit?:number, offset?:number},...fields:Field[]):IQuery=>{
             const condition:string = 'clientId = :clientId';
             const tableName:string = `clients`;
-            const queryStr:string = constructSelect(fields,tableName,condition,"LIMIT 1;");
-            return {queryStr , queryData : {clientId}};
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+            return {queryStr , queryData };
         },
 
-        byTenentId : (ignorePagination:boolean,tenentId,...fields:Field[]):IQuery=>{
+        byTenentId : (queryData:{tenentId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
             const condition:string = 'tenentId = :tenentId';
             const tableName:string = `clients`;
-            const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-            return {queryStr , queryData : {tenentId}}
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+            return {queryStr , queryData };
         },
 
-        byUserId : (ignorePagination:boolean,userId:number,...fields:Field[]):IQuery=>{
+        byUserId : (queryData:{userId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
             const condition:string = 'userId = :userId';
             const tableName:string = `clients`;
-            const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-            return {queryStr , queryData : {userId}}
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+            return {queryStr , queryData }
         }
 
     }
 
     static update:UpdateCollection = {
 
-        all : (...fields:Field[]):IQuery => {
+        all : (queryData:object,...fields:Field[]):IQuery => {
             const condition:string = '';
             const tableName:string = 'clients';
             const queryStr:string = constructUpdate(fields,tableName,condition);
-            return {queryStr , queryData : {}};
+            return {queryStr , queryData };
         },
 
-        byClientId : (clientId:number,...fields:Field[]):IQuery => {
+        byClientId : (queryData:{clientId:number},...fields:Field[]):IQuery => {
             const condition:string = ' clientId = :clientId ';
             const tableName:string = 'clients';
             const queryStr:string = constructUpdate(fields,tableName,condition);
-            return {queryStr , queryData : {clientId}};
+            return {queryStr , queryData };
         },
 
-        byTenentId : (tenentId:number,...fields:Field[]):IQuery => {
+        byTenentId : (queryData:{tenentId:number},...fields:Field[]):IQuery => {
             const condition:string = ' tenentId = :tenentId ';
             const tableName:string = 'clients';
             const queryStr:string = constructUpdate(fields,tableName,condition);
-            return {queryStr , queryData : {tenentId}};
+            return {queryStr , queryData };
         },
 
-        byUserId : (userId:number,...fields:Field[]) => {
+        byUserId : (queryData:{userId:number},...fields:Field[]) => {
             const condition:string = ' userId = :userId ';
             const tableName:string = 'clients';
             const queryStr:string = constructUpdate(fields,tableName,condition);
-            return {queryStr , queryData : {userId}};
+            return {queryStr , queryData };
         }
 
     }
 
     static delete:DeleteCollection = {
 
-        all : ():IQuery => {
+        all : (queryData:{limit?:number , offset?:number}):IQuery => {
             const condition:string = '';
             const tableName:string = 'clients';
-            const queryStr:string = constructDelete(tableName,condition);
-            return {queryStr , queryData : {}};
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructDelete(tableName,condition,paginationStr);
+            return {queryStr , queryData };
         },
 
-        byClientId : (clientId:number):IQuery => {
+        byClientId : (queryData:{clientId:number , limit?:number, offset?:number}):IQuery => {
             const condition:string = 'clientId = :clientId';
             const tableName:string = 'clients';
-            const queryStr:string = constructDelete(tableName,condition);
-            return {queryStr , queryData : {clientId}};
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructDelete(tableName,condition,paginationStr);
+            return {queryStr , queryData };
         },
 
-        byTenentId : (tenentId:number):IQuery => {
+        byTenentId : (queryData:{tenentId:number, limit?:number, offset?:number}):IQuery => {
             const condition:string = 'tenentId = :tenentId';
             const tableName:string = 'clients';
-            const queryStr:string = constructDelete(tableName,condition);
-            return {queryStr , queryData : {tenentId}};
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructDelete(tableName,condition,paginationStr);
+            return {queryStr , queryData};
         },
 
-        byUserId : (userId:number):IQuery => {
+        byUserId : (queryData:{userId:number, limit?:number, offset?:number}):IQuery => {
             const condition:string = 'userId = :userId';
             const tableName:string = 'clients';
-            const queryStr:string = constructDelete(tableName,condition);
-            return {queryStr , queryData : {userId}};
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructDelete(tableName,condition,paginationStr);
+            return {queryStr , queryData };
         }
 
     }
@@ -156,10 +164,10 @@ export default class ClientQG{
         return {queryStr , queryData:{}};
     }
 
-    public static insertClient(data:object):IQuery{
+    public static insertClient(queryData:object):IQuery{
         const queryStr:string = insertString (ClientQG.fields,`clients`);
 
-        return {queryStr , queryData : data};
+        return {queryStr , queryData };
     }
 
 }

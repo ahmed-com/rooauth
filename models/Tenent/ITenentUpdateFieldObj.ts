@@ -1,6 +1,6 @@
 import Field from "../../query_genrators/Field";
 
-export default interface ITenentFieldObj{
+export default interface ITenentUpdateFieldObj{
     subjectSchema?:Field,
     mfaEnableDefault?:Field,
     mfaMethod?:Field,

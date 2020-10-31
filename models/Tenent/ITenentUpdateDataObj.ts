@@ -1,4 +1,3 @@
-import MfaMethod from "./MfaMethodEnum";
 import SubjectSchema from "./Schema";
 
 export default interface ITenentUpdateDataObj{

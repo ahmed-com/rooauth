@@ -12,8 +12,8 @@ import SubjectQG from '../../query_genrators/SubjectQG/SubjectQG';
 import TokenQG from '../../query_genrators/TokenQG/TokenQG';
 import LoginQG from '../../query_genrators/LoginQG/LoginQG';
 import StorageEngine from '../../query_genrators/StorageEngineEnum';
-import ITenentUpdateDataObj from './ITenentDataObj';
-import ITenentFieldObj from './ITenentFieldObj';
+import ITenentUpdateDataObj from './ITenentUpdateDataObj';
+import ITenentFieldObj from './ITenentUpdateFieldObj';
 
 export default class Tenent{
 
