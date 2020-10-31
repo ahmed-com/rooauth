@@ -1,7 +1,5 @@
-import SubjectSchema from "./Schema";
-
 export default interface ITenentUpdateDataObj{
-    subjectSchema?:SubjectSchema | null,
+    subjectSchema?:string | null,
     mfaEnableDefault?:boolean,
     mfaMethod?:string,
     privateKeyCipher?:string,

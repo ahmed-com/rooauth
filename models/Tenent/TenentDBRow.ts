@@ -2,7 +2,7 @@ import SubjectSchema from './Schema';
 
 export default interface TenentDBRow{
     tenentId?:number,
-    subjectSchema?:SubjectSchema | null,
+    subjectSchema?:string | null,
     mfaDefault?:boolean,
     mfaMethod?:string,
     privateKeyCipher?:string,
