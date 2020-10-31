@@ -12,8 +12,9 @@ import SubjectQG from '../../query_genrators/SubjectQG/SubjectQG';
 import TokenQG from '../../query_genrators/TokenQG/TokenQG';
 import LoginQG from '../../query_genrators/LoginQG/LoginQG';
 import StorageEngine from '../../query_genrators/StorageEngineEnum';
-import ITenentUpdateDataObj from './ITenentDataObj';
-import ITenentFieldObj from './ITenentFieldObj';
+import ITenentUpdateDataObj from './ITenentUpdateDataObj';
+import ITenentFieldObj from './ITenentUpdateFieldObj';
+import IQuery from '../../query_genrators/IQuery';
 
 export default class Tenent{
 
@@ -21,9 +22,9 @@ export default class Tenent{
     private static manyExecute:multipleExecute = pool.manyExecute;
     public static execute:myExecute = pool.execute;
 
-    public id:number;
+    public tenentId:number;
 
-    private _schema?:SubjectSchema | null;
+    private _subjectSchema?:SubjectSchema | null;
     private _mfaDefault?:boolean;
     private _mfaMethod?:MfaMethod;
     private _privateKeyCipher?:string;
@@ -39,8 +40,8 @@ export default class Tenent{
 
     private changes:{fields:ITenentFieldObj, dataObj:ITenentUpdateDataObj};
 
-    constructor(id:number){
-        this.id = id;
+    constructor(tenentId:number){
+        this.tenentId = tenentId;
 
         this.execute = pool.execute;
         this.manyExecute = pool.manyExecute;
@@ -51,14 +52,21 @@ export default class Tenent{
     };
 
     private async saveChanges():Promise<void>{
+        const tenentId:number = this.tenentId;
+
         const tenentExist:boolean = await this.doExist();
         if(!tenentExist) throw new Error("Tenent Doesn't exist");
 
         const changedFields:Field[] = Object.values(this.changes.fields);
-        const query:string = Tenent.queryGenerator.update.byTenentId(...changedFields);
+        const queryData:ITenentUpdateDataObj = this.changes.dataObj;
 
-        const data:ITenentUpdateDataObj = this.changes.dataObj;
-        return this.execute(query,data)
+        const query:IQuery = Tenent.queryGenerator.update.byTenentId({
+            tenentId,
+            ...queryData
+        },...changedFields);
+
+        
+        return this.execute(query)
         .then(()=>{
             this.changes.dataObj = {};
             this.changes.fields = {};
@@ -66,11 +74,10 @@ export default class Tenent{
     }
 
     private async doExist():Promise<boolean>{
-        const query:string = Tenent.queryGenerator.doExist();
+        const tQG:TenentQG = new Tenent.queryGenerator(this.tenentId);
+        const query:IQuery = tQG.doExist();
 
-        return this.execute(query,{
-            tenentId: this.id
-        })
+        return this.execute(query)
         .then(result=>result[0])
         .then(row=>{
             return row.bool === 1 ? true : false;
@@ -80,34 +87,34 @@ export default class Tenent{
     private fill(
         row:TenentDBRow
     ){
-        this._schema = row.subject_schema;
-        this._mfaDefault = row.mfa_enable_default;
-        this._privateKeyCipher = row.private_key_cipher;
-        this._publicKey = row.public_key;
-        this._hasIpWhiteList = row.allow_ip_white_listing;
-        this._maxSession = row.max_session;
-        this._ipRateLimit = row.ip_rate_limit;
-        if(row.mfa_method === MfaMethod.email) this._mfaMethod = MfaMethod.email;
+        this._mfaDefault = row.mfaDefault;
+        this._privateKeyCipher = row.privateKeyCipher;
+        this._publicKey = row.publicKey;
+        this._hasIpWhiteList = row.hasIpWhiteList;
+        this._maxSession = row.maxSession;
+        this._ipRateLimit = row.ipRateLimit;
+
+        if(row.mfaMethod === MfaMethod.email) this._mfaMethod = MfaMethod.email;
 
         if(
-            row.store_logins            !== undefined &&
-            row.store_created_at        !== undefined &&
-            row.store_updated_at        !== undefined &&
-            row.store_login_time        !== undefined &&
-            row.store_login_device_info !== undefined &&
-            row.subject_schema          !== undefined
+            row.storeLogins           !== undefined &&
+            row.storeSubjectCreatedAt !== undefined &&
+            row.storeSubjectUpdatedAt !== undefined &&
+            row.storeLoginTime        !== undefined &&
+            row.storeLoginDeviceInfo  !== undefined &&
+            row.subjectSchema         !== undefined
         ){
             let storeForLogins:any = false;
-            if(row.store_logins === true) storeForLogins = {
-                deviceInfo : row.store_login_device_info,
-                loggedAt : row.store_login_time
+            if(row.storeLogins === true) storeForLogins = {
+                deviceInfo : row.storeLoginDeviceInfo,
+                loggedAt : row.storeLoginTime
             }
 
             this._tenentStore = {
                 storeForSubject : {
-                    createdAt : row.store_created_at,
-                    updatedAt : row.store_updated_at,
-                    data : row.subject_schema === null ? false : true
+                    createdAt : row.storeSubjectCreatedAt,
+                    updatedAt : row.storeSubjectUpdatedAt,
+                    data : row.subjectSchema === null ? false : true
                 },
                 storeForLogins,
                 storeForTokens:{
@@ -115,16 +122,21 @@ export default class Tenent{
                 }
             }; 
         }
+
+        if(row.subjectSchema !== undefined && row.subjectSchema !== null) this._subjectSchema = JSON.parse(row.subjectSchema);
     }
 
     private async populateFromDB():Promise<void>{
         const tenent:Tenent = this;
+        const tenentId:number = this.tenentId;
         const allReadableFields:Field[] = Object.values(Tenent.queryGenerator.readableFields);
-        const query:string = Tenent.queryGenerator.select.byTenentId(true,...allReadableFields);
 
-        return this.execute(query,{
-            tenentId : this.id
-        })
+        const query:IQuery = Tenent.queryGenerator.select.byTenentId({
+            tenentId,
+            limit: 1
+        },...allReadableFields);
+
+        return this.execute(query)
         .then(function captureTheFirstResult(result:TenentDBRow[]):TenentDBRow{
             if(result[0] !== undefined){
                 return result[0];
@@ -137,23 +149,23 @@ export default class Tenent{
         });
     }
     
-    public get schema():Promise<SubjectSchema | null>{
-        if(this._schema !== undefined){
-            return Promise.resolve(this._schema);
+    public get subjectSchema():Promise<SubjectSchema | null>{
+        if(this._subjectSchema !== undefined){
+            return Promise.resolve(this._subjectSchema);
         }else{
             return this.populateFromDB()
             .then(()=>{
-                return this._schema!
+                return this._subjectSchema!
             });
         }
     }
 
-    public set schema(schema:Promise<SubjectSchema | null>){
+    public set subjectSchema(schema:Promise<SubjectSchema | null>){
         schema
         .then(schema=>{
-            this._schema = schema;
+            this._subjectSchema = schema;
             this.changes.fields.subjectSchema = Tenent.queryGenerator.writableFields.subjectSchema;
-            this.changes.dataObj.subjectSchema = schema;
+            this.changes.dataObj.subjectSchema = JSON.stringify(schema);
         });
     }
 
@@ -193,7 +205,8 @@ export default class Tenent{
         .then(mfaMethod=>{
             this._mfaMethod = mfaMethod;
             this.changes.fields.mfaMethod = Tenent.queryGenerator.writableFields.mfaMethod;
-            this.changes.dataObj.mfaMethod = mfaMethod;
+            
+            if(mfaMethod === MfaMethod.email) this.changes.dataObj.mfaMethod = "email";
         })
     }
     
@@ -288,6 +301,8 @@ export default class Tenent{
         }
     }
 
+    // Notice that there is no setter function beacuse you can never update the tenent data store after initialization
+
     private get privateKeyCipher():Promise<string>{
         if(this._privateKeyCipher !== undefined){
             return Promise.resolve(this._privateKeyCipher);
@@ -313,58 +328,61 @@ export default class Tenent{
     }
 
     private static async InsertTenent(
-        mfaMethod:MfaMethod | null,
-        mfaDefault:boolean | null,
-        privateKeyCipher:string,
-        publicKey:string,
-        hasIpWhiteList:boolean | null,
-        tenentStore:ITenentStore | ITenentStoreInput,
-        maxSession:number | null,
-        ipRateLimit:number | null,
-        schema:SubjectSchema | null,
+        _mfaMethod:MfaMethod | null,
+        _mfaDefault:boolean | null,
+        _privateKeyCipher:string,
+        _publicKey:string,
+        _hasIpWhiteList:boolean | null,
+        _tenentStore:ITenentStore | ITenentStoreInput,
+        _maxSession:number | null,
+        _ipRateLimit:number | null,
+        _subjectSchema:SubjectSchema | null,
         execute:myExecute
     ):Promise<number>{
-        const query:string = Tenent.queryGenerator.insertTenent();
+        const subjectSchema:string = JSON.stringify(_subjectSchema);
 
-        const subjectSchema:string = JSON.stringify(schema);
-        const allowIpWhieListing:boolean | null = hasIpWhiteList;
-        const mfaEnableDefault:boolean | null = mfaDefault;
-        const storeCreatedAt:boolean | null = tenentStore.storeForSubject.createdAt;
-        const storeUpdatedAt:boolean | null = tenentStore.storeForSubject.updatedAt;
+        const mfaMethod:string | null = _mfaMethod === null ? _mfaMethod : MfaMethod[_mfaMethod]
+
+        const hasIpWhiteList:boolean | null = _hasIpWhiteList;
+        const mfaDefault:boolean | null = _mfaDefault;
+        const storeSubjectCreatedAt:boolean | null = _tenentStore.storeForSubject.createdAt;
+        const storeSubjectUpdatedAt:boolean | null = _tenentStore.storeForSubject.updatedAt;
 
         let storeLogins:boolean | null;
         let storeLoginTime:boolean | null;
         let storeLoginDeviceInfo:boolean | null;
 
-        if(tenentStore.storeForLogins === false){
+        if(_tenentStore.storeForLogins === false){
             storeLogins = false;
             storeLoginTime = false;
             storeLoginDeviceInfo = false;
-        }else if(tenentStore.storeForLogins === null){
+        }else if(_tenentStore.storeForLogins === null){
             storeLogins = null;
             storeLoginTime = null;
             storeLoginDeviceInfo = null;
         }else{
             storeLogins = true;
-            storeLoginTime = tenentStore.storeForLogins.loggedAt;
-            storeLoginDeviceInfo = tenentStore.storeForLogins.deviceInfo;
+            storeLoginTime = _tenentStore.storeForLogins.loggedAt;
+            storeLoginDeviceInfo = _tenentStore.storeForLogins.deviceInfo;
         }
-        
-        return execute(query,{
+
+        const query:IQuery = Tenent.queryGenerator.insertTenent({
             subjectSchema,
-            mfaEnableDefault,
-            mfaMethod : mfaMethod === null ? mfaMethod : MfaMethod[mfaMethod],
-            privateKeyCipher,
-            publicKey,
-            allowIpWhieListing,
+            mfaDefault,
+            mfaMethod,
+            hasIpWhiteList,
+            privateKeyCipher : _privateKeyCipher,
+            publicKey : _publicKey,
             storeLogins,
             storeLoginDeviceInfo,
             storeLoginTime,
-            storeCreatedAt,
-            storeUpdatedAt,
-            maxSession,
-            ipRateLimit
-        })
+            storeSubjectCreatedAt,
+            storeSubjectUpdatedAt,
+            maxSession : _maxSession,
+            ipRateLimit: _ipRateLimit
+        });
+        
+        return execute(query)
         .then(({insertId})=>insertId);
     }
 
@@ -382,7 +400,8 @@ export default class Tenent{
 
         let tenent:Tenent;
 
-        return Tenent.manyExecute(async function insertTenentInDB(execute:myExecute) {
+        return Tenent.manyExecute(async function insertTenentIntoDB(execute:myExecute) {
+
             const insertId:number = await Tenent.InsertTenent(
                 mfaMethod,
                 mfaDefault,
@@ -401,22 +420,24 @@ export default class Tenent{
             const defaultExecute:myExecute = tenent.execute;
             tenent.execute = execute;
             const _tenentStore:ITenentStore = await tenent.tenentStore;
+            tenent.execute = defaultExecute;
 
             const tenentQG:TenentQG = new Tenent.queryGenerator(insertId);
             const subjectQG:SubjectQG = tenentQG.getSubjectQG(_tenentStore);
             const tokenQG:TokenQG = tenentQG.getTokenQG(_tenentStore);
             const loginQG:LoginQG | null = tenentQG.getLoginsQG(_tenentStore);
 
-            const createSubjectTableQuery:string = subjectQG.createTable(StorageEngine.InnoDB);
-            const createTokenTableQuery:string = tokenQG.createTable(StorageEngine.InnoDB);
-            let createLoginTableQuery:string = '';
-            if(loginQG !== null) createLoginTableQuery = loginQG.createTable(StorageEngine.InnoDB);
+            const createSubjectTableQuery:IQuery = subjectQG.createTable(StorageEngine.InnoDB);
+            await execute(createSubjectTableQuery);
 
-            await execute(createSubjectTableQuery,{});
-            await execute(createTokenTableQuery,{});
-            if(loginQG !== null) await execute(createLoginTableQuery,{});
+            const createTokenTableQuery:IQuery = tokenQG.createTable(StorageEngine.InnoDB);
+            await execute(createTokenTableQuery);
 
-            tenent.execute = defaultExecute;
+            if(loginQG !== null){
+                const createLoginTableQuery:IQuery = loginQG.createTable(StorageEngine.InnoDB);
+                await execute(createLoginTableQuery);
+            }
+
         })
         .then(()=>tenent);
     }

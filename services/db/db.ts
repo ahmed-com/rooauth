@@ -1,6 +1,7 @@
 const toUnnamed = require('named-placeholders')();
 const mysql = require('mysql2');
 import dbConfig from '../../config/dbConfig.json';
+import IQuery from '../../query_genrators/IQuery';
 import PromisifiedPool from "./PromisifiedPool";
 import {basic , actionPeroformer , myExecute} from './types';
 
@@ -15,8 +16,10 @@ const dbPool = mysql.createPool({
 
 const myPool:PromisifiedPool = {
 
-    execute : (query:string , data:object):Promise<basic[]> =>{
-        const [unnamedQuery,dataArray] = toUnnamed(query,data);
+    execute : (query:IQuery):Promise<basic[]> =>{
+        const {queryStr , queryData} = query;
+        const [unnamedQuery,dataArray] = toUnnamed(queryStr,queryData);
+
         return new Promise<any>((resolve,reject)=>{
             dbPool.execute(unnamedQuery, dataArray,(err:Error, rows:basic[])=>{
                 if (err) {
@@ -35,8 +38,9 @@ const myPool:PromisifiedPool = {
 function manyExecute(performAction:actionPeroformer):Promise<void> {
     const connection = dbPool.getConnection();
 
-    function execute(query:string,data:object):Promise<any> {
-        const [unnamedQuery,dataArray] = toUnnamed(query,data);
+    function execute(query:IQuery):Promise<any> {
+        const {queryStr , queryData} = query;
+        const [unnamedQuery,dataArray] = toUnnamed(queryStr,queryData);
 
         return new Promise<any>((resolve,reject)=>{
             connection.execute(unnamedQuery, dataArray,(executeError:Error, rows:basic[])=>{

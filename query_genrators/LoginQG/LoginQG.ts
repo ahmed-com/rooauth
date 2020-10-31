@@ -5,7 +5,7 @@ import FieldCollection from '../FieldCollection';
 import StorageEngine from "../StorageEngineEnum";
 import { pagination , defienetionString, insertString, constructSelect, constructUpdate } from "../utils";
 import Field from '../Field';
-import constructDelete from '../utils/constructDelete';
+import IQuery from '../IQuery';
 
 export default class LoginQG{
 
@@ -23,8 +23,8 @@ export default class LoginQG{
 
         this.fields = {
             subjectId : {
-                name : 'subject_id',
-                definetion: 'subject_id INTEGER UNSIGNED NOT NULL',
+                name : 'subjectId',
+                definetion: 'subjectId INTEGER UNSIGNED NOT NULL',
                 insertionValue: ':subjectId',
                 updateValue: ':subjectId'
             },
@@ -37,15 +37,15 @@ export default class LoginQG{
             },
 
             passwordLogin : {
-                name : 'password_login',
-                definetion : 'password_login BOOLEAN NOT NULL',
+                name : 'passwordLogin',
+                definetion : 'passwordLogin BOOLEAN NOT NULL',
                 insertionValue : ':passwordLogin',
                 updateValue : ':passwordLogin'
             },
 
             clientId : {
-                name : 'client_id',
-                definetion : 'client_id INTEGER UNSIGNED NOT NULL',
+                name : 'clientId',
+                definetion : 'clientId INTEGER UNSIGNED NOT NULL',
                 insertionValue : ':clientId',
                 updateValue : ':clientId'
             },
@@ -69,34 +69,44 @@ export default class LoginQG{
 
         this.select = {
 
-            all : (ignorePagination:boolean,...fields:Field[]):string=>{
+            all : (queryData:{limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}logins`;
-                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            bySubject : (ignorePagination:boolean,...fields:Field[]):string=>{
-                const condition:string = 'subject_id = :subjectId';
+            bySubject : (queryData:{subjectId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
+                const condition:string = 'subjectId = :subjectId';
                 const tableName:string = `tno${this.tenentId}logins`;
-                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            byIp : (ignorePagination:boolean,...fields:Field[]):string=>{
+            byIp : (queryData:{ip:string, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'ip = :ip';
                 const tableName:string = `tno${this.tenentId}logins`;
-                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            byJti : (ignorePagination:boolean,...fields:Field[]):string=>{
+            byJti : (queryData:{jti:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'jti = :jti';
                 const tableName:string = `tno${this.tenentId}logins`;
-                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            byClientId : (ignorePagination:boolean,...fields:Field[]):string=>{
-                const condition:string = 'client_id = :clientId';
+            byClientId : (queryData:{clientId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
+                const condition:string = 'clientId = :clientId';
                 const tableName:string = `tno${this.tenentId}logins`;
-                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             }
         }
 
@@ -115,16 +125,19 @@ export default class LoginQG{
         return this.tenentId;
     }
 
-    public createTable(engine:StorageEngine):string{
+    public createTable(engine:StorageEngine):IQuery{
         const fieldsString:string = defienetionString(this.fields);
-        
-        return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}logins (
+        const queryStr:string = `CREATE TABLE IF NOT EXISTS tno${this.tenentId}logins (
             ${fieldsString},
             FOREIGN KEY (jti) REFERENCES tno${this.tenentId}tokens(jti) ON DELETE SET NULL ON UPDATE CASCADE
         )ENGINE=${engine};`;
+
+        return {queryStr , queryData : {}};
     }
 
-    public insertLogin():string{
-        return insertString(this.fields,`tno${this.tenentId}logins`);
+    public insertLogin(queryData:object):IQuery{
+        const queryStr:string = insertString(this.fields,`tno${this.tenentId}logins`);;
+
+        return {queryStr,queryData };
     }
 }

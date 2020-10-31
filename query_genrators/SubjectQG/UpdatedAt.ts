@@ -7,8 +7,8 @@ export default class UpdatedAt extends SubjectQG{
         super(sQG.id);
 
         const decoratorField:Field = {
-            name : 'updated_at',
-            definetion : 'updated_at DATETIME NULL',
+            name : 'updatedAt',
+            definetion : 'updatedAt DATETIME NULL',
             insertionValue : ':updatedAt',
             updateValue : ':updatedAt'
         }

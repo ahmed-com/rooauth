@@ -1,6 +1,6 @@
-import Field from './Field';
+import IQuery from './IQuery';
 
-type DeletionCollection = (...fields:Field[])=>string;
+type DeletionCollection = (queryData:any)=>IQuery;
 
 export default interface selectionCollection{
     [field:string] : DeletionCollection

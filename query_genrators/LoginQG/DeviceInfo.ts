@@ -7,8 +7,8 @@ export default class DeviceInfo extends LoginQG{
         super(lQG.id);
 
         const decoratorField:Field = {
-            definetion:'device_info VARCHAR(255) NULL',
-            name:'device_info',
+            definetion:'deviceInfo VARCHAR(255) NULL',
+            name:'deviceInfo',
             insertionValue:':deviceInfo',
             updateValue:':deviceInfo'
         }

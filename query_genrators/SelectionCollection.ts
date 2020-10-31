@@ -1,6 +1,7 @@
 import Field from './Field';
+import IQuery from './IQuery';
 
-type SelectionMethod = (ignorePagination:boolean,...fields:Field[])=>string;
+type SelectionMethod = (queryData:any,...fields:Field[])=>IQuery;
 
 export default interface selectionCollection{
     [field:string] : SelectionMethod

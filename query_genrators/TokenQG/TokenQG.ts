@@ -6,6 +6,7 @@ import Field from "../Field";
 import StorageEngine from "../StorageEngineEnum";
 import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
 import constructDelete from '../utils/constructDelete';
+import IQuery from '../IQuery';
 
 export default class TokenQG{
 
@@ -53,83 +54,103 @@ export default class TokenQG{
 
         this.select = {
 
-            all : (ignorePagination:boolean,...fields:Field[]):string=>{
+            all : (queryData:{limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData : {}};
             },
 
-            byJti : (_:boolean,...fields:Field[]):string=>{
+            byJti : (queryData:{jti:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'jti = :jti';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructSelect(fields,tableName,condition,"LIMIT 1");
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            tokensExpiredBeforeDate : (ignorePagination:boolean,...fields:Field[]):string=>{
-                const condition:string = 'exp < :exp';
+            tokensExpiredBeforeDate : (queryData:{date:Date, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
+                const condition:string = 'exp < :date';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            bySub : (ignorePagination:boolean,...fields:Field[]):string=>{
+            bySub : (queryData:{sub:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'sub = :sub';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             }
         }
 
         this.update = {
 
-            all : (...fields:Field[]):string=>{
+            all : (queryData:object,...fields:Field[]):IQuery=>{
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructUpdate(fields,tableName,condition);
+                const queryStr:string = constructUpdate(fields,tableName,condition);
+                return {queryStr , queryData };
             },
 
-            byJti : (...fields:Field[]):string=>{
+            byJti : (queryData:{jti:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'jti = :jti';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructUpdate(fields,tableName,condition);
+                const queryStr:string = constructUpdate(fields,tableName,condition);
+                return {queryStr , queryData };
             },
 
-            tokensExpiredBeforeDate : (...fields:Field[]):string=>{
-                const condition:string = 'exp < :exp';
+            tokensExpiredBeforeDate : (queryData:{date:Date},...fields:Field[]):IQuery=>{
+                const condition:string = 'exp < :date';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructUpdate(fields,tableName,condition);
+                const queryStr:string = constructUpdate(fields,tableName,condition);
+                return {queryStr , queryData };
             },
 
-            bySub : (...fields:Field[]):string=>{
+            bySub : (queryData:{sub:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'sub = :sub';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructUpdate(fields,tableName,condition);
+                const queryStr:string = constructUpdate(fields,tableName,condition);
+                return {queryStr , queryData };
             }
 
         }
 
         this.delete = {
 
-            all : ():string => {
+            all : (queryData:{limit?:number, offset?:number}):IQuery => {
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructDelete(tableName,condition);
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructDelete(tableName,condition,paginationStr);
+                return {queryStr , queryData : {}};
             },
 
-            byJti : ():string => {
+            byJti : (queryData:{jti:number, limit?:number, offset?:number}):IQuery => {
                 const condition:string = 'jti = :jti';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructDelete(tableName,condition);
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructDelete(tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            bySub : ():string => {
+            bySub : (queryData:{sub:number, limit?:number, offset?:number}):IQuery => {
                 const condition:string = 'sub = :sub';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructDelete(tableName,condition);
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructDelete(tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            tokensExpiredBeforeDate : ():string => {
-                const condition:string = 'exp < :exp';
+            tokensExpiredBeforeDate : (queryData:{date:Date, limit?:number, offset?:number}):IQuery => {
+                const condition:string = 'exp < :date';
                 const tableName:string = `tno${this.tenentId}tokens`;
-                return constructDelete(tableName,condition);
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructDelete(tableName,condition,paginationStr);
+                return {queryStr , queryData };
             }
 
         }
@@ -140,17 +161,20 @@ export default class TokenQG{
         return this.tenentId;
     }
 
-    public createTable(engine:StorageEngine):string{
+    public createTable(engine:StorageEngine):IQuery{
         const fieldsString:string = defienetionString(this.fields);
-
-        return `CREATE TABLE IF NOT EXISTS tno${this.tenentId}tokens (
+        const queryStr:string = `CREATE TABLE IF NOT EXISTS tno${this.tenentId}tokens (
             ${fieldsString}
             PRIMARY KEY (jti),
             FOREIGN KEY (sub) REFERENCES tno${this.tenentId}subjects(id) ON DELETE CASCADE ON UPDATE CASCADE
         )ENGINE=${engine};`;
+
+        return {queryStr , queryData : {}};
     }
 
-    public insertToken():string{
-        return insertString (this.fields,`tno${this.tenentId}tokens`)
+    public insertToken(queryData:object):IQuery{
+        const queryStr:string = insertString (this.fields,`tno${this.tenentId}tokens`);
+
+        return {queryStr , queryData };
     }
 }

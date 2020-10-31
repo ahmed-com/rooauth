@@ -1,6 +1,7 @@
 import Field from '../Field';
 import LoginQG from './LoginQG';
 import { constructSelect, pagination } from '../utils';
+import IQuery from '../IQuery';
 
 export default class LoggedAt extends LoginQG{
 
@@ -10,8 +11,8 @@ export default class LoggedAt extends LoginQG{
         const decoratorDefault:string = 'NOW()';
         const decoratorField:Field = {
             default : decoratorDefault,
-            definetion : `logged_at DATETIME NOT NULL DEFAULT ${decoratorDefault}`,
-            name : "logged_at",
+            definetion : `loggedAt DATETIME NOT NULL DEFAULT ${decoratorDefault}`,
+            name : "loggedAt",
             insertionValue : `IFNULL(:loggedAt,${decoratorDefault})`,
             updateValue : ':loggedAt'
         };
@@ -26,15 +27,19 @@ export default class LoggedAt extends LoginQG{
         }
     }
 
-    private selectLoginsAfterDate(ignorePagination:boolean,...fields:Field[]):string{
-        const condition:string = 'logged_at > :date';
+    private selectLoginsAfterDate(queryData:{date:Date, limit?:number, offset?:number},...fields:Field[]):IQuery{
+        const condition:string = 'loggedAt > :date';
         const tableName:string = `tno${this.id}logins`;
-        return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+        const paginationStr:string = pagination(queryData);
+        const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+        return {queryStr, queryData };
     }
 
-    private selectLoginsBeforeDate(ignorePagination:boolean,...fields:Field[]):string{
-        const condition:string = 'logged_at < :date';
+    private selectLoginsBeforeDate(queryData:{date:Date, limit?:number, offset?:number},...fields:Field[]):IQuery{
+        const condition:string = 'loggedAt < :date';
         const tableName:string = `tno${this.id}logins`;
-        return constructSelect(fields,tableName,condition,pagination(ignorePagination));
+        const paginationStr:string = pagination(queryData);
+        const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+        return {queryStr , queryData };
     }
 }
