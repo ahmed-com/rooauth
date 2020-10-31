@@ -35,11 +35,12 @@ export default class IpQG{
 
     static select:SelectionCollection = {
 
-        byTenentId : (ignorePagination:boolean,tenentId:number,...fields:Field[]):IQuery=>{
+        byTenentId : (queryData:{tenentId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
             const condition:string = 'tenentId = :tenentId';
             const tableName:string = `ips`;
-            const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-            return {queryStr , queryData : {tenentId}}
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+            return {queryStr , queryData }
         }
 
     }
@@ -54,10 +55,10 @@ export default class IpQG{
         return {queryStr , queryData : {}};
     }
 
-    public static insertIp(data:object):IQuery{
+    public static insertIp(queryData:object):IQuery{
         const queryStr:string = insertString (IpQG.fields,`ips`);
 
-        return {queryStr , queryData : data};
+        return {queryStr , queryData };
     }
 
 }
