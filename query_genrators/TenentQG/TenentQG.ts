@@ -183,54 +183,58 @@ export default class TenentQG {
 
     static select:SelectionCollection = {
 
-        all : (ignorePagination:boolean,...fields:Field[]):IQuery=>{
+        all : (queryData:{limit?:number, offset?:number},...fields:Field[]):IQuery=>{
             const condition:string = '';
             const tableName:string = `tenents`;
-            const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-            return {queryStr , queryData : {}};
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+            return {queryStr , queryData };
         },
 
-        byTenentId : (_:boolean,tenentId:number,...fields:Field[]):IQuery=>{
+        byTenentId : (queryData:{tenentId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
             const condition:string = 'tenentId = :tenentId';
             const tableName:string = `tenents`;
-            const queryStr:string = constructSelect(fields,tableName,condition," LIMIT 1 ");
-            return {queryStr , queryData :{tenentId}};
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+            return {queryStr , queryData };
         },
 
     }
 
     static update:UpdateCollection = {
 
-        all : (...fields:Field[]):IQuery => {
+        all : (queryData:object,...fields:Field[]):IQuery => {
             const condition:string = '';
             const tableName:string = `tenents`;
             const queryStr:string = constructUpdate(fields,tableName,condition);
-            return {queryStr , queryData : {}};
+            return {queryStr , queryData };
         },
 
-        byTenentId : (tenentId:number,...fields:Field[]):IQuery => {
+        byTenentId : (queryData:{tenentId:number},...fields:Field[]):IQuery => {
             const condition:string = 'tenentId = :tenentId';
             const tableName:string = `tenents`;
             const queryStr:string = constructUpdate(fields,tableName,condition);
-            return {queryStr , queryData : {tenentId}};
+            return {queryStr , queryData };
         },
 
     }
 
     static delete:DeleteCollection = {
 
-        all : ():IQuery => {
+        all : (queryData:{limit?:number, offset?:number}):IQuery => {
             const condition:string = '';
             const tableName:string = 'tenents';
-            const queryStr:string = constructDelete(tableName,condition);
-            return {queryStr , queryData : {}};
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructDelete(tableName,condition,paginationStr);
+            return {queryStr , queryData };
         },
 
-        byTenentId : (tenentId:number):IQuery => {
+        byTenentId : (queryData:{tenentId:number, limit?:number, offset?:number}):IQuery => {
             const condition:string = 'tenentId = :tenentId';
             const tableName:string = 'tenents';
-            const queryStr:string = constructDelete(tableName,condition);
-            return {queryStr , queryData : {tenentId}};
+            const paginationStr:string = pagination(queryData);
+            const queryStr:string = constructDelete(tableName,condition,paginationStr);
+            return {queryStr , queryData };
         },
 
     }
@@ -255,10 +259,10 @@ export default class TenentQG {
         return {queryStr , queryData : {}};
     }
 
-    static insertTenent(data:object):IQuery{
+    static insertTenent(queryData:object):IQuery{
         const queryStr:string = insertString (TenentQG.fields,`tenents`);
 
-        return {queryStr , queryData : data};
+        return {queryStr , queryData };
     }
 
     public getSubjectQG(tenentStore:ITenentStore):SubjectQG{
