@@ -42,45 +42,49 @@ export default class CreatedAt extends SubjectQG{
 
     }
 
-    private selectSubjectCreatedAfterDate(ignorePagination:boolean,date:Date,...fields:Field[]):IQuery{
+    private selectSubjectCreatedAfterDate(queryData:{date:Date, limit?:number, offset?:number},...fields:Field[]):IQuery{
         const condition:string = 'createdAt > :date';
         const tableName:string = `tno${this.id}subject`;
-        const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-        return {queryStr , queryData : {date}}
+        const paginationStr:string = pagination(queryData);
+        const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+        return {queryStr , queryData }
     }
 
-    private selectSubjectCreatedBeforeDate(ignorePagination:boolean,date:Date,...fields:Field[]):IQuery{
+    private selectSubjectCreatedBeforeDate(queryData:{date:Date, limit?:number, offset?:number},...fields:Field[]):IQuery{
         const condition:string = 'createdAt < :date';
         const tableName:string = `tno${this.id}subject`;
-        const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-        return {queryStr , queryData : {date}}
+        const paginationStr:string = pagination(queryData);
+        const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+        return {queryStr , queryData }
     }
 
-    private updateSubjectCreatedAfterDate(date:Date,...fields:Field[]):IQuery{
+    private updateSubjectCreatedAfterDate(queryData:{date:Date},...fields:Field[]):IQuery{
         const condition:string = 'createdAt > :date';
         const tableName:string = `tno${this.id}subject`;
         const queryStr:string = constructUpdate(fields,tableName,condition);
-        return {queryStr , queryData : {date}};
+        return {queryStr , queryData };
     }
 
-    private updateSubjectCreatedBeforeDate(date:Date,...fields:Field[]):IQuery{
+    private updateSubjectCreatedBeforeDate(queryData:{date:Date},...fields:Field[]):IQuery{
         const condition:string = 'createdAt < :date';
         const tableName:string = `tno${this.id}subject`;
         const queryStr:string = constructUpdate(fields,tableName,condition);
-        return {queryStr , queryData : {date}};
+        return {queryStr , queryData };
     }
 
-    private deleteSubjectCreatedAfterDate(date:Date):IQuery{
+    private deleteSubjectCreatedAfterDate(queryData:{date:Date, limit?:number, offset?:number}):IQuery{
         const condition:string = 'createdAt > :date';
         const tableName:string = `tno${this.id}subject`;
-        const queryStr:string = constructDelete(tableName,condition);
-        return {queryStr , queryData : {date}};
+        const paginationStr:string = pagination(queryData);
+        const queryStr:string = constructDelete(tableName,condition,paginationStr);
+        return {queryStr , queryData };
     }
 
-    private deleteSubjectCreatedBeforeDate(date:Date):IQuery{
+    private deleteSubjectCreatedBeforeDate(queryData:{date:Date, limit?:number, offset?:number}):IQuery{
         const condition:string = 'createdAt < :date';
         const tableName:string = `tno${this.id}subject`;
-        const queryStr:string = constructDelete(tableName,condition);
-        return {queryStr , queryData : {date}};
+        const paginationStr:string = pagination(queryData);
+        const queryStr:string = constructDelete(tableName,condition,paginationStr);
+        return {queryStr , queryData };
     }
 }

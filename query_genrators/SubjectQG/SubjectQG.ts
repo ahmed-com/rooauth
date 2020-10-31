@@ -91,75 +91,81 @@ export default class SubjectQG{
 
         this.select = {
 
-            all : (ignorePagination:boolean,...fields:Field[]):IQuery=>{
+            all : (queryData:{limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                const queryStr:string = constructSelect(fields,tableName,condition,pagination(ignorePagination));
-                return {queryStr , queryData : {}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            byId : (_:boolean,id:number,...fields:Field[]):IQuery=>{
+            byId : (queryData:{id:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'id = :id';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                const queryStr:string = constructSelect(fields,tableName,condition,"LIMIT 1");
-                return {queryStr , queryData : {id}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
 
-            byAccount : (_:boolean,account:string,...fields:Field[]):IQuery=>{
+            byAccount : (queryData:{account:string, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'account = :account';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                const queryStr:string = constructSelect(fields,tableName,condition,"LIMIT 1");
-                return {queryStr , queryData : {account}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
+                return {queryStr , queryData };
             }
 
         }
 
         this.update = {
 
-            all : (...fields:Field[]):IQuery=>{
+            all : (queryData:object,...fields:Field[]):IQuery=>{
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}subjects`;
                 const queryStr:string = constructUpdate(fields,tableName,condition);
-                return {queryStr , queryData : {}};
+                return {queryStr , queryData };
             },
 
-            byId : (id:number,...fields:Field[]):IQuery=>{
+            byId : (queryData:{id:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'id = :id';
                 const tableName:string = `tno${this.tenentId}subjects`;
                 const queryStr:string = constructUpdate(fields,tableName,condition);
-                return {queryStr , queryData : {id}};
+                return {queryStr , queryData };
             },
 
-            byAccount : (account:string,...fields:Field[]):IQuery=>{
+            byAccount : (queryData:{account:string},...fields:Field[]):IQuery=>{
                 const condition:string = 'account = :account';
                 const tableName:string = `tno${this.tenentId}subjects`;
                 const queryStr:string = constructUpdate(fields,tableName,condition);
-                return {queryStr , queryData : {account}};
+                return {queryStr , queryData };
             },
 
         },
 
         this.delete = {
 
-            all : ():IQuery=>{
+            all : (queryData:{limit?:number, offset?:number}):IQuery=>{
                 const condition:string = '';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                const queryStr:string = constructDelete(tableName,condition);
-                return {queryStr , queryData : {}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructDelete(tableName,condition,paginationStr);
+                return {queryStr , queryData};
             },
             
-            byId : (id:number):IQuery=>{
+            byId : (queryData:{id:number, limit?:number, offset?:number}):IQuery=>{
                 const condition:string = 'id = :id';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                const queryStr:string = constructDelete(tableName,condition);
-                return {queryStr , queryData : {id}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructDelete(tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
             
-            byAccount : (account:string):IQuery=>{
+            byAccount : (queryData:{account:string, limit?:number, offset?:number}):IQuery=>{
                 const condition:string = 'account = :account';
                 const tableName:string = `tno${this.tenentId}subjects`;
-                const queryStr:string = constructDelete(tableName,condition);
-                return {queryStr , queryData : {account}};
+                const paginationStr:string = pagination(queryData);
+                const queryStr:string = constructDelete(tableName,condition,paginationStr);
+                return {queryStr , queryData };
             },
             
         }
@@ -180,10 +186,10 @@ export default class SubjectQG{
         return {queryStr, queryData : {}};
     }
 
-    public insertSubject(data:object):IQuery{
+    public insertSubject(queryData:object):IQuery{
         const queryStr:string = insertString (this.fields,`tno${this.tenentId}subjects`);
 
-        return {queryStr , queryData : data};
+        return {queryStr , queryData };
     }
 
 }
