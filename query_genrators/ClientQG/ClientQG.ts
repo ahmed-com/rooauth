@@ -1,16 +1,16 @@
 import Field from "../Field";
-import FieldCollection from '../FieldCollection';
-import SelectionCollection from "../SelectionCollection";
-import UpdateCollection from "../UpdateCollection";
-import DeleteCollection from '../DeletionCollection';
 import StorageEngine from "../StorageEngineEnum";
 import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
 import constructDelete from "../utils/constructDelete";
 import IQuery from "../IQuery";
+import IClientFieldCollection from "./IClientFieldCollection";
+import IClientSelectionCollection from "./IClientSelectionCollection";
+import IClientUpdateCollection from "./IClientUpdateCollection";
+import IClientDeletionCollection from "./IClientDeletionCollection";
 
 export default class ClientQG{
 
-    static fields:FieldCollection = {
+    static fields:IClientFieldCollection = {
 
         clientId : {
             name : 'clientId',
@@ -42,15 +42,17 @@ export default class ClientQG{
 
     }
 
-    static readableFields:FieldCollection = {
+    static readableFields = {
         ...ClientQG.fields
     };
 
-    static writableFields:FieldCollection = {
-        ...ClientQG.fields
+    static writableFields = {
+        clientSecret : ClientQG.fields.clientSecret,
+        userId : ClientQG.fields.userId,
+        tenentId : ClientQG.fields.tenentId
     };
 
-    static select:SelectionCollection = {
+    static select:IClientSelectionCollection = {
 
         all : (queryData:{limit?:number, offset?:number},...fields:Field[]):IQuery=>{
             const condition:string = '';
@@ -86,7 +88,7 @@ export default class ClientQG{
 
     }
 
-    static update:UpdateCollection = {
+    static update:IClientUpdateCollection = {
 
         all : (queryData:object,...fields:Field[]):IQuery => {
             const condition:string = '';
@@ -118,7 +120,7 @@ export default class ClientQG{
 
     }
 
-    static delete:DeleteCollection = {
+    static delete:IClientDeletionCollection = {
 
         all : (queryData:{limit?:number , offset?:number}):IQuery => {
             const condition:string = '';
@@ -155,7 +157,8 @@ export default class ClientQG{
     }
 
     public static createTable(engine:StorageEngine):IQuery{
-        const fieldsString:string = defienetionString(ClientQG.fields);
+        const allFields:Field[] = Object.values(ClientQG.fields);
+        const fieldsString:string = defienetionString(allFields);
         const queryStr:string = `CREATE TABLE IF NOT EXISTS clients(
             ${fieldsString},
             FOREIGN KEY (tenentId) REFERENCES tenents(tenentId) ON DELETE CASCADE ON UPDATE CASCADE
@@ -165,7 +168,8 @@ export default class ClientQG{
     }
 
     public static insertClient(queryData:object):IQuery{
-        const queryStr:string = insertString (ClientQG.fields,`clients`);
+        const allFields:Field[] = Object.values(ClientQG.fields);
+        const queryStr:string = insertString (allFields,`clients`);
 
         return {queryStr , queryData };
     }

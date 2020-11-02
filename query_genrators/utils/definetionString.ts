@@ -1,9 +1,6 @@
-import FieldCollection from '../FieldCollection';
 import Field from '../Field';
 
-export default function definetionString(arr:FieldCollection):string{
-    const fieldsArray:Field[] = Object.values(arr);
-        
+export default function definetionString(fieldsArray:Field[]):string{
     let fieldsString:string = fieldsArray[0].definetion || '';
 
     for (let index = 1; index < fieldsArray.length; index++) {
