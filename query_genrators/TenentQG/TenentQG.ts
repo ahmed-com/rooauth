@@ -16,7 +16,7 @@ import subjectDataAtDecorator from '../SubjectQG/Data'
 import tokenVerifiedDecorator from '../TokenQG/Verified';
 
 import loginTimeDecorator from '../LoginQG/LoggedAt';
-import loginDeviceInfoDecorator from '../LoginQG/DeviceInfo';
+import loginDeviceInfoDecorator from '../LoginQG/decorators/DeviceInfo';
 
 // JSON
 import config from "../../config/config.json";

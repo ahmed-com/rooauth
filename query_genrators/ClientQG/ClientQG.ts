@@ -3,10 +3,10 @@ import StorageEngine from "../StorageEngineEnum";
 import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
 import constructDelete from "../utils/constructDelete";
 import IQuery from "../IQuery";
-import IClientFieldCollection from "./interfaces/IClientFieldCollection";
-import IClientSelectionCollection from "./interfaces/IClientSelectionCollection";
-import IClientUpdateCollection from "./interfaces/IClientUpdateCollection";
-import IClientDeletionCollection from "./interfaces/IClientDeletionCollection";
+import IClientFieldCollection from "./interfaces/ClientFieldCollection";
+import IClientSelectionCollection from "./interfaces/ClientSelectionCollection";
+import IClientUpdateCollection from "./interfaces/ClientUpdateCollection";
+import IClientDeletionCollection from "./interfaces/ClientDeletionCollection";
 
 export default class ClientQG{
 

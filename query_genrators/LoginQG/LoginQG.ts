@@ -1,21 +1,16 @@
-import SelectionCollection from '../SelectionCollection';
-import UpdateCollection from '../UpdateCollection';
-import DeletionCollection from '../DeletionCollection';
-import FieldCollection from '../FieldCollection';
 import StorageEngine from "../StorageEngineEnum";
 import { pagination , defienetionString, insertString, constructSelect, constructUpdate } from "../utils";
 import Field from '../Field';
 import IQuery from '../IQuery';
+import LoginFieldCollection from "./interfaces/LoginFieldCollection";
+import LoginSelectionCollection from "./interfaces/LoginSelectionCollection";
 
 export default class LoginQG{
 
-    public fields:FieldCollection;
-    public readableFields:FieldCollection;
-    public writableFields:FieldCollection;
+    public fields:LoginFieldCollection;
+    public readableFields:LoginFieldCollection;
 
-    public select:SelectionCollection;
-    public update:UpdateCollection;
-    public delete:DeletionCollection;
+    public select:LoginSelectionCollection;
 
     constructor(
         private tenentId:number
@@ -62,11 +57,6 @@ export default class LoginQG{
             ...this.fields
         }
 
-        /**
-         * there are no field that is writable in the log
-         */
-        this.writableFields = {}
-
         this.select = {
 
             all : (queryData:{limit?:number, offset?:number},...fields:Field[]):IQuery=>{
@@ -77,7 +67,7 @@ export default class LoginQG{
                 return {queryStr , queryData };
             },
 
-            bySubject : (queryData:{subjectId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
+            bySubjectId : (queryData:{subjectId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
                 const condition:string = 'subjectId = :subjectId';
                 const tableName:string = `tno${this.tenentId}logins`;
                 const paginationStr:string = pagination(queryData);
@@ -110,15 +100,6 @@ export default class LoginQG{
             }
         }
 
-        /**
-         * you cannot update any records from the log
-         */
-        this.update = {}
-
-        /**
-         * you cannot delete any records from the log
-         */
-        this.delete = {}
     }
 
     public get id():number{
@@ -126,7 +107,8 @@ export default class LoginQG{
     }
 
     public createTable(engine:StorageEngine):IQuery{
-        const fieldsString:string = defienetionString(this.fields);
+        const allFields:Field[] = Object.values(this.fields);
+        const fieldsString:string = defienetionString(allFields);
         const queryStr:string = `CREATE TABLE IF NOT EXISTS tno${this.tenentId}logins (
             ${fieldsString},
             FOREIGN KEY (jti) REFERENCES tno${this.tenentId}tokens(jti) ON DELETE SET NULL ON UPDATE CASCADE
@@ -136,7 +118,8 @@ export default class LoginQG{
     }
 
     public insertLogin(queryData:object):IQuery{
-        const queryStr:string = insertString(this.fields,`tno${this.tenentId}logins`);;
+        const allFields:Field[] = Object.values(this.fields);
+        const queryStr:string = insertString(allFields,`tno${this.tenentId}logins`);;
 
         return {queryStr,queryData };
     }

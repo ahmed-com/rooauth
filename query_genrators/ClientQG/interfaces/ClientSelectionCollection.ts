@@ -1,5 +1,5 @@
-import Field from '../Field';
-import IQuery from '../IQuery';
+import Field from '../../Field';
+import IQuery from '../../IQuery';
 
 type SelectionMethod = (queryData:any,...fields:Field[])=>IQuery;
 
