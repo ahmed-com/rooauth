@@ -180,7 +180,8 @@ export default class SubjectQG{
         const fieldsString:string = defienetionString(this.fields);
         const queryStr:string = `CREATE TABLE IF NOT EXISTS tno${this.tenentId}subjects (
             ${fieldsString},
-            PRIMARY KEY (id)
+            PRIMARY KEY (id),
+            INDEX account_index (account)
         ) ENGINE=${engine};`
 
         return {queryStr, queryData : {}};
@@ -188,6 +189,12 @@ export default class SubjectQG{
 
     public insertSubject(queryData:object):IQuery{
         const queryStr:string = insertString (this.fields,`tno${this.tenentId}subjects`);
+
+        return {queryStr , queryData };
+    }
+
+    public doExist(queryData:{id:number}):IQuery{
+        const queryStr:string = `SELECT EXISTS( SELECT id FROM tno${this.tenentId}subjects WHERE id = :id LIMIT 1 ) AS exists;`
 
         return {queryStr , queryData };
     }

@@ -20,7 +20,7 @@ export default class CreatedAt extends SubjectQG{
 
         this.fields = {...sQG.fields , decoratorField};
         this.readableFields = {...sQG.readableFields , decoratorField};
-        this.writableFields = {...sQG.writableFields , decoratorField};
+        // this.writableFields = {...sQG.writableFields , decoratorField}; // this field is not writable
 
         this.select = {
             subjectsCreatedAfterDate: this.selectSubjectCreatedAfterDate,

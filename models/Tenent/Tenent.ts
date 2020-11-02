@@ -1,24 +1,27 @@
 import TenentQG from '../../query_genrators/TenentQG/TenentQG';
-import SubjectSchema from './Schema';
-import MfaMethod from './MfaMethodEnum';
-import ITenentStore from './ITenentStore';
-import pool from "../../services/db/db";
-import TenentDBRow from './TenentDBRow';
-import Field from '../../query_genrators/Field';
-import { encryptText , decryptCipher, generateKeys } from '../../cryptographer';
-import ITenentStoreInput from './ITenentStoreInput';
-import {multipleExecute, myExecute} from '../../services/db/types';
 import SubjectQG from '../../query_genrators/SubjectQG/SubjectQG';
 import TokenQG from '../../query_genrators/TokenQG/TokenQG';
 import LoginQG from '../../query_genrators/LoginQG/LoginQG';
-import StorageEngine from '../../query_genrators/StorageEngineEnum';
-import ITenentUpdateDataObj from './ITenentUpdateDataObj';
-import ITenentFieldObj from './ITenentUpdateFieldObj';
+import Field from '../../query_genrators/Field';
 import IQuery from '../../query_genrators/IQuery';
+import StorageEngine from '../../query_genrators/StorageEngineEnum';
+
+import SubjectSchema from './Schema';
+import MfaMethod from './MfaMethodEnum';
+import ITenentStore from './ITenentStore';
+import TenentDBRow from './TenentDBRow';
+import ITenentUpdateDataObj from './ITenentUpdateDataObj';
+import ITenentUpdateFieldObj from './ITenentUpdateFieldObj';
+import ITenentStoreInput from './ITenentStoreInput';
+
+import { encryptText , decryptCipher, generateKeys } from '../../cryptographer';
+
+import pool from "../../services/db/db";
+import {multipleExecute, myExecute} from '../../services/db/types';
 
 export default class Tenent{
 
-    private static queryGenerator = TenentQG;
+    public static queryGenerator = TenentQG;
     private static manyExecute:multipleExecute = pool.manyExecute;
     public static execute:myExecute = pool.execute;
 
@@ -38,7 +41,7 @@ export default class Tenent{
     public execute:myExecute;
     private manyExecute:multipleExecute;
 
-    private changes:{fields:ITenentFieldObj, dataObj:ITenentUpdateDataObj};
+    private changes:{fields:ITenentUpdateFieldObj, dataObj:ITenentUpdateDataObj};
 
     constructor(tenentId:number){
         this.tenentId = tenentId;
@@ -51,7 +54,7 @@ export default class Tenent{
         }
     };
 
-    private async saveChanges():Promise<void>{
+    public async saveChanges():Promise<void>{
         const tenentId:number = this.tenentId;
 
         const tenentExist:boolean = await this.doExist();
@@ -73,9 +76,9 @@ export default class Tenent{
         });
     }
 
-    private async doExist():Promise<boolean>{
+    public async doExist():Promise<boolean>{
         const tQG:TenentQG = new Tenent.queryGenerator(this.tenentId);
-        const query:IQuery = tQG.doExist();
+        const query:IQuery = tQG.doExist({tenentId : this.tenentId});
 
         return this.execute(query)
         .then(result=>result[0])
@@ -84,9 +87,8 @@ export default class Tenent{
         });
     }
 
-    private fill(
-        row:TenentDBRow
-    ){
+    private fill(row:TenentDBRow):void{
+        
         this._mfaDefault = row.mfaDefault;
         this._privateKeyCipher = row.privateKeyCipher;
         this._publicKey = row.publicKey;
@@ -124,6 +126,7 @@ export default class Tenent{
         }
 
         if(row.subjectSchema !== undefined && row.subjectSchema !== null) this._subjectSchema = JSON.parse(row.subjectSchema);
+        if(row.subjectSchema !== undefined && row.subjectSchema === null) this._subjectSchema = null;
     }
 
     private async populateFromDB():Promise<void>{

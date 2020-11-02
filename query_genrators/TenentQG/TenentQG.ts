@@ -294,10 +294,9 @@ export default class TenentQG {
         return loginQG;
     }
 
-    public doExist():IQuery{
-        const tenentId:number = this.id;
+    public doExist(queryData:{tenentId:number}):IQuery{
         const queryStr:string = `SELECT EXISTS( SELECT tenentId FROM tenents WHERE tenentId = :tenentId LIMIT 1 ) AS exists;`
 
-        return {queryStr , queryData : {tenentId}};
+        return {queryStr , queryData };
     }
 }
