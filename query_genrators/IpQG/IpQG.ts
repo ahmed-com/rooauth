@@ -2,8 +2,8 @@ import Field from "../Field";
 import StorageEngine from "../StorageEngineEnum";
 import {pagination , insertString, defienetionString, constructSelect} from '../utils';
 import IQuery from "../IQuery";
-import IIpFieldCollection from "./IIpFieldCollection";
-import IIpSelectionCollection from "./IIpSelectionCollection";
+import IIpFieldCollection from "./interfaces/IpFieldCollection";
+import IIpSelectionCollection from "./interfaces/IpSelectionCollection";
 
 export default class IpQG{
 
