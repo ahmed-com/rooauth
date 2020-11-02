@@ -1,13 +1,13 @@
 import Field from "../Field";
-import FieldCollection from '../FieldCollection';
-import SelectionCollection from "../SelectionCollection";
 import StorageEngine from "../StorageEngineEnum";
 import {pagination , insertString, defienetionString, constructSelect} from '../utils';
 import IQuery from "../IQuery";
+import IIpFieldCollection from "./IIpFieldCollection";
+import IIpSelectionCollection from "./IIpSelectionCollection";
 
 export default class IpQG{
 
-    static fields:FieldCollection = {
+    static fields:IIpFieldCollection = {
         
         ip : {
             name :'ip',
@@ -25,15 +25,15 @@ export default class IpQG{
 
     }
 
-    static readableFields:FieldCollection = {
+    static readableFields = {
         ...IpQG.fields
     };
 
-    static writableFields:FieldCollection = {
+    static writableFields = {
         ...IpQG.fields
     };
 
-    static select:SelectionCollection = {
+    static select:IIpSelectionCollection = {
 
         byTenentId : (queryData:{tenentId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
             const condition:string = 'tenentId = :tenentId';
@@ -46,7 +46,8 @@ export default class IpQG{
     }
 
     public static createTable(engine:StorageEngine):IQuery{
-        const fieldsString:string = defienetionString(IpQG.fields);
+        const allFields:Field[] = Object.values(IpQG.fields);
+        const fieldsString:string = defienetionString(allFields);
         const queryStr:string = `CREATE TABLE IF NOT EXISTS ips(
             ${fieldsString}
             FOREIGN KEY (tenentId) REFERENCES tenents(tenentId) ON DELETE CASCADE ON UPDATE CASCADE
@@ -56,7 +57,8 @@ export default class IpQG{
     }
 
     public static insertIp(queryData:object):IQuery{
-        const queryStr:string = insertString (IpQG.fields,`ips`);
+        const allFields:Field[] = Object.values(IpQG.fields);
+        const queryStr:string = insertString (allFields,`ips`);
 
         return {queryStr , queryData };
     }
