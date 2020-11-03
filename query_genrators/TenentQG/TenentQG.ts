@@ -3,19 +3,19 @@ import StorageEngine from "../StorageEngineEnum";
 
 // interfaces
 import Field from "../Field";
-import FieldCollection from '../FieldCollection';
-import SelectionCollection from "../SelectionCollection";
-import UpdateCollection from "../UpdateCollection";
-import DeleteCollection from "../DeletionCollection";
+import TenentFieldCollection from "./interfaces/TenentFieldCollection"
+import TenentSelectionCollection from "./interfaces/TenentSelectionCollection";
+import TenentUpdateCollection from "./interfaces/TenentUpdateCollection";
+import TenentDeletionCollection from "./interfaces/TenentDeletionCollection";
 import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
 
-import subjectCreatedAtDecorator from '../SubjectQG/decorators.ts/CreatedAt'
-import subjectUpdatedAtDecorator from '../SubjectQG/UpdatedAt'
-import subjectDataAtDecorator from '../SubjectQG/Data'
+import subjectCreatedAtDecorator from '../SubjectQG/decorators/CreatedAt'
+import subjectUpdatedAtDecorator from '../SubjectQG/decorators/UpdatedAt'
+import subjectDataAtDecorator from '../SubjectQG/decorators/Data'
 
 import tokenVerifiedDecorator from '../TokenQG/Verified';
 
-import loginTimeDecorator from '../LoginQG/LoggedAt';
+import loginTimeDecorator from '../LoginQG/decorators/LoggedAt';
 import loginDeviceInfoDecorator from '../LoginQG/decorators/DeviceInfo';
 
 // JSON
@@ -28,6 +28,8 @@ import LoginsQG from '../LoginQG/LoginQG';
 import ITenentStore from "../../models/Tenent/ITenentStore";
 import constructDelete from "../utils/constructDelete";
 import IQuery from "../IQuery";
+
+type TenentWritableFieldCollection = Omit<TenentFieldCollection, "tenentId">
 
 
 export default class TenentQG {
@@ -55,7 +57,7 @@ export default class TenentQG {
     /**
      * all the fields
      */
-    static fields:FieldCollection = {
+    static fields:TenentFieldCollection = {
 
         tenentId : {
             name : 'tenentId',
@@ -170,18 +172,18 @@ export default class TenentQG {
     /**
      * the readable fields
      */
-    static readableFields:FieldCollection = {
+    static readableFields:TenentFieldCollection = {
         ...TenentQG.fields
     };
 
     /**
      * the writable fields
      */
-    static writableFields:FieldCollection = {
+    static writableFields:TenentWritableFieldCollection = {
         ...TenentQG.fields
     }
 
-    static select:SelectionCollection = {
+    static select:TenentSelectionCollection = {
 
         all : (queryData:{limit?:number, offset?:number},...fields:Field[]):IQuery=>{
             const condition:string = '';
@@ -201,7 +203,7 @@ export default class TenentQG {
 
     }
 
-    static update:UpdateCollection = {
+    static update:TenentUpdateCollection = {
 
         all : (queryData:object,...fields:Field[]):IQuery => {
             const condition:string = '';
@@ -219,7 +221,7 @@ export default class TenentQG {
 
     }
 
-    static delete:DeleteCollection = {
+    static delete:TenentDeletionCollection = {
 
         all : (queryData:{limit?:number, offset?:number}):IQuery => {
             const condition:string = '';
@@ -250,7 +252,8 @@ export default class TenentQG {
     }
 
     static createTable(engine:StorageEngine):IQuery{
-        const fieldsString:string = defienetionString(TenentQG.fields);
+        const allFields:Field[] = Object.values(this.fields);
+        const fieldsString:string = defienetionString(allFields);
         const queryStr:string = `CREATE TABLE IF NOT EXISTS tenents (
             ${fieldsString},
             PRIMARY KEY (tenentId)
@@ -260,7 +263,8 @@ export default class TenentQG {
     }
 
     static insertTenent(queryData:object):IQuery{
-        const queryStr:string = insertString (TenentQG.fields,`tenents`);
+        const allFields:Field[] = Object.values(this.fields);
+        const queryStr:string = insertString (allFields,`tenents`);
 
         return {queryStr , queryData };
     }
