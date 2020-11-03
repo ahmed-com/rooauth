@@ -13,7 +13,7 @@ import subjectCreatedAtDecorator from '../SubjectQG/decorators/CreatedAt'
 import subjectUpdatedAtDecorator from '../SubjectQG/decorators/UpdatedAt'
 import subjectDataAtDecorator from '../SubjectQG/decorators/Data'
 
-import tokenVerifiedDecorator from '../TokenQG/Verified';
+import tokenVerifiedDecorator from '../TokenQG/decorators/Verified';
 
 import loginTimeDecorator from '../LoginQG/decorators/LoggedAt';
 import loginDeviceInfoDecorator from '../LoginQG/decorators/DeviceInfo';

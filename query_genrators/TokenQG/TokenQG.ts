@@ -1,22 +1,22 @@
-import FieldCollection from '../FieldCollection';
-import SelectionCollection from "../SelectionCollection";
-import UpdateCollection from '../UpdateCollection';
-import DeleteCollection from '../DeletionCollection';
+import TokenFieldCollection from './interfaces/TokenFieldCollection';
+import TokenSelectionCollection from "./interfaces/TokenSelectionCollection";
+import TokenDeletionCollection from './interfaces/TokenDeletionCollection';
+import TokenUpdateCollection from './interfaces/TokenUpdateCollection';
 import Field from "../Field";
 import StorageEngine from "../StorageEngineEnum";
-import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
+import {pagination , insertString, defienetionString, constructSelect} from '../utils';
 import constructDelete from '../utils/constructDelete';
 import IQuery from '../IQuery';
 
 export default class TokenQG{
 
-    public fields:FieldCollection;
-    public readableFields:FieldCollection;
-    public writableFields:FieldCollection;
+    public fields:TokenFieldCollection;
+    public readableFields:TokenFieldCollection;
+    public writableFields:{verified?:Field};
 
-    public select:SelectionCollection;
-    public update:UpdateCollection;
-    public delete:DeleteCollection;
+    public select:TokenSelectionCollection;
+    public delete:TokenDeletionCollection;
+    public update:TokenUpdateCollection;
 
     constructor(
         private tenentId:number
@@ -48,9 +48,7 @@ export default class TokenQG{
             ...this.fields
         };
 
-        this.writableFields = {
-            ...this.fields
-        }
+        this.writableFields = {}
 
         this.select = {
 
@@ -87,37 +85,7 @@ export default class TokenQG{
             }
         }
 
-        this.update = {
-
-            all : (queryData:object,...fields:Field[]):IQuery=>{
-                const condition:string = '';
-                const tableName:string = `tno${this.tenentId}tokens`;
-                const queryStr:string = constructUpdate(fields,tableName,condition);
-                return {queryStr , queryData };
-            },
-
-            byJti : (queryData:{jti:number},...fields:Field[]):IQuery=>{
-                const condition:string = 'jti = :jti';
-                const tableName:string = `tno${this.tenentId}tokens`;
-                const queryStr:string = constructUpdate(fields,tableName,condition);
-                return {queryStr , queryData };
-            },
-
-            tokensExpiredBeforeDate : (queryData:{date:Date},...fields:Field[]):IQuery=>{
-                const condition:string = 'exp < :date';
-                const tableName:string = `tno${this.tenentId}tokens`;
-                const queryStr:string = constructUpdate(fields,tableName,condition);
-                return {queryStr , queryData };
-            },
-
-            bySub : (queryData:{sub:number},...fields:Field[]):IQuery=>{
-                const condition:string = 'sub = :sub';
-                const tableName:string = `tno${this.tenentId}tokens`;
-                const queryStr:string = constructUpdate(fields,tableName,condition);
-                return {queryStr , queryData };
-            }
-
-        }
+        this.update = {}
 
         this.delete = {
 
@@ -162,7 +130,8 @@ export default class TokenQG{
     }
 
     public createTable(engine:StorageEngine):IQuery{
-        const fieldsString:string = defienetionString(this.fields);
+        const allFields:Field[] = Object.values(this.fields);
+        const fieldsString:string = defienetionString(allFields);
         const queryStr:string = `CREATE TABLE IF NOT EXISTS tno${this.tenentId}tokens (
             ${fieldsString}
             PRIMARY KEY (jti),
@@ -173,7 +142,8 @@ export default class TokenQG{
     }
 
     public insertToken(queryData:object):IQuery{
-        const queryStr:string = insertString (this.fields,`tno${this.tenentId}tokens`);
+        const allFields:Field[] = Object.values(this.fields);
+        const queryStr:string = insertString (allFields,`tno${this.tenentId}tokens`);
 
         return {queryStr , queryData };
     }
