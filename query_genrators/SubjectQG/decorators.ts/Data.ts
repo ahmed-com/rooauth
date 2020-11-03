@@ -1,5 +1,5 @@
-import Field from '../Field';
-import SubjectQG from './SubjectQG';
+import Field from '../../Field';
+import SubjectQG from '../SubjectQG';
 
 export default class Data extends SubjectQG{
 
@@ -13,8 +13,8 @@ export default class Data extends SubjectQG{
             updateValue : ':data'
         }
         
-        this.fields = {...sQG.fields , decoratorField};
-        this.readableFields = {...sQG.readableFields , decoratorField};
-        this.writableFields = {...sQG.writableFields , decoratorField};
+        this.fields = {...sQG.fields , data:decoratorField};
+        this.readableFields = {...sQG.readableFields , data:decoratorField};
+        this.writableFields = {...sQG.writableFields , data:decoratorField};
     }
 }

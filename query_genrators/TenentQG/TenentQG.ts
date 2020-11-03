@@ -9,7 +9,7 @@ import UpdateCollection from "../UpdateCollection";
 import DeleteCollection from "../DeletionCollection";
 import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
 
-import subjectCreatedAtDecorator from '../SubjectQG/CreatedAt'
+import subjectCreatedAtDecorator from '../SubjectQG/decorators.ts/CreatedAt'
 import subjectUpdatedAtDecorator from '../SubjectQG/UpdatedAt'
 import subjectDataAtDecorator from '../SubjectQG/Data'
 

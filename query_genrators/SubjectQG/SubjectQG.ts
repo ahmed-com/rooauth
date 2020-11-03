@@ -1,25 +1,27 @@
+import SubjectFieldCollection from "./interfaces/SubjectFieldCollection";
+import SubjectSelectionCollection from "./interfaces/SubjectSelectionCollection";
+import SubjectUpdatedCollection from "./interfaces/SubjectUpdateCollection";
+import SubjectDeletionCollection from "./interfaces/SubjectDeletionCollection";
 import Field from "../Field";
-import FieldCollection from '../FieldCollection';
 import StorageEngine from "../StorageEngineEnum";
-import SelectionCollection from "../SelectionCollection";
-import UpdateCollection from '../UpdateCollection';
-import DeletionCollection from '../DeletionCollection';
 import {pagination , insertString, defienetionString, constructSelect, constructUpdate} from '../utils';
 import constructDelete from "../utils/constructDelete";
 import IQuery from "../IQuery";
 
+type SubjectWritableFieldsCollection = Omit<SubjectFieldCollection , "id"|"createdAt">
+
 export default class SubjectQG{
 
-    public fields:FieldCollection;
-    public readableFields:FieldCollection;
-    public writableFields:FieldCollection;
+    public fields:SubjectFieldCollection;
+    public readableFields:SubjectFieldCollection;
+    public writableFields:SubjectWritableFieldsCollection;
 
     private enableMfa_default:string;
     private accountVerified_default:string;
 
-    public select:SelectionCollection;
-    public update:UpdateCollection;
-    public delete:DeletionCollection;
+    public select:SubjectSelectionCollection;
+    public update:SubjectUpdatedCollection;
+    public delete:SubjectDeletionCollection;
 
     constructor(
         private tenentId:number
@@ -86,7 +88,12 @@ export default class SubjectQG{
         }
 
         this.writableFields = {
-            ...this.fields
+            account : this.fields.account,
+            passwordHash: this.fields.passwordHash,
+            passwordChangedAt: this.fields.passwordChangedAt,
+            oldPasswordHash: this.fields.oldPasswordHash,
+            enableMfa: this.fields.enableMfa,
+            accountVerified:this.fields.accountVerified
         }
 
         this.select = {
@@ -177,7 +184,8 @@ export default class SubjectQG{
     }
 
     public createTable(engine:StorageEngine):IQuery{
-        const fieldsString:string = defienetionString(this.fields);
+        const allFields:Field[] = Object.values(this.fields);
+        const fieldsString:string = defienetionString(allFields);
         const queryStr:string = `CREATE TABLE IF NOT EXISTS tno${this.tenentId}subjects (
             ${fieldsString},
             PRIMARY KEY (id),
@@ -188,7 +196,8 @@ export default class SubjectQG{
     }
 
     public insertSubject(queryData:object):IQuery{
-        const queryStr:string = insertString (this.fields,`tno${this.tenentId}subjects`);
+        const allFields:Field[] = Object.values(this.fields);
+        const queryStr:string = insertString (allFields,`tno${this.tenentId}subjects`);
 
         return {queryStr , queryData };
     }
