@@ -2,11 +2,11 @@ import Field from "../../query_genrators/Field";
 
 export default interface ITenentUpdateFieldObj{
     subjectSchema?:Field,
-    mfaEnableDefault?:Field,
+    mfaDefault?:Field,
     mfaMethod?:Field,
     privateKeyCipher?:Field,
     publicKey?:Field,
-    allowIpWhiteListing?:Field,
+    hasIpWhiteList?:Field,
     maxSession?:Field,
     ipRateLimit?:Field
 }

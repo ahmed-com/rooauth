@@ -187,8 +187,8 @@ export default class Tenent{
         mfaDefault
         .then(mfaDefault=>{
             this._mfaDefault = mfaDefault
-            this.changes.fields.mfaEnableDefault = Tenent.queryGenerator.writableFields.mfaEnableDefault;
-            this.changes.dataObj.mfaEnableDefault = mfaDefault;
+            this.changes.fields.mfaDefault = Tenent.queryGenerator.writableFields.mfaDefault;
+            this.changes.dataObj.mfaDefault = mfaDefault;
         });
     }
 
@@ -248,8 +248,8 @@ export default class Tenent{
         has
         .then(has=>{
             this._hasIpWhiteList = has;
-            this.changes.fields.allowIpWhiteListing = Tenent.queryGenerator.writableFields.allowIpWhieListing;
-            this.changes.dataObj.allowIpWhiteListing = has;
+            this.changes.fields.hasIpWhiteList = Tenent.queryGenerator.writableFields.hasIpWhiteList;
+            this.changes.dataObj.hasIpWhiteList = has;
         });
     }
     
