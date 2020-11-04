@@ -1,9 +1,6 @@
-import FieldCollection from "../FieldCollection";
 import Field from '../Field';
 
-export default function insertString(arr:FieldCollection , tableName:string):string{
-    const fieldsArray:Field[] = Object.values(arr);
-
+export default function insertString(fieldsArray:Field[] , tableName:string):string{
     let fieldsString:string = fieldsArray[0].name || '';
     let valuesString:string = fieldsArray[0].insertionValue || '';
 

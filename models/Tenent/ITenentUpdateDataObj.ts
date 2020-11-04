@@ -1,10 +1,10 @@
 export default interface ITenentUpdateDataObj{
     subjectSchema?:string | null,
-    mfaEnableDefault?:boolean,
+    mfaDefault?:boolean,
     mfaMethod?:string,
     privateKeyCipher?:string,
     publicKey?:string,
-    allowIpWhiteListing?:boolean,
+    hasIpWhiteList?:boolean,
     maxSession?:number,
     ipRateLimit?:number
 }

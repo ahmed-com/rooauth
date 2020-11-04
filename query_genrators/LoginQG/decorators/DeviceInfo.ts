@@ -1,5 +1,5 @@
-import Field from '../Field';
-import LoginQG from './LoginQG';
+import Field from '../../Field';
+import LoginQG from '../LoginQG';
 
 export default class DeviceInfo extends LoginQG{
 
@@ -13,7 +13,7 @@ export default class DeviceInfo extends LoginQG{
             updateValue:':deviceInfo'
         }
         
-        this.fields = {...lQG.fields , decoratorField};
-        this.readableFields = {...lQG.fields , decoratorField};
+        this.fields = {...lQG.fields , deviceInfo:decoratorField};
+        this.readableFields = {...lQG.fields , deviceInfo:decoratorField};
     }
 }
