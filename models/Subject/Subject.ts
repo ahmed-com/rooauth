@@ -262,19 +262,12 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
             });
         }
 
-        private async getSubjectPasswordHash():Promise<string>{
-            if(this._passwordHash !== undefined){
-                return this._passwordHash;
-            }else{
-                await this.populateFromDB();
-                return this._passwordHash!;
-            }
-        }
-
         public async delete():Promise<void>{
             const query:IQuery = Subject.queryGenerator.delete.byId({
-                
-            })
+                id:this.id
+            });
+
+            await this.execute(query);
         }
 
     }
