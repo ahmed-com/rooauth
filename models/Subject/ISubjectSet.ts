@@ -6,6 +6,5 @@ export default interface ISubjectSet{
     enableMfa: (enableMfa:boolean) => void,
     accountVerified: (accountVerified:boolean) => void,
 
-    updatedAt?: (updatedAt:Date | null) => void,
-    date?: (date:string) => void
+    data?: (data:string | null) => void
 }

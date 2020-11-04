@@ -27,7 +27,19 @@ export default class Verified extends TokenQG{
                 const tableName:string = `tno${this.id}tokens`
                 const queryStr:string = constructUpdate(fields,tableName,condition);
                 return {queryStr , queryData};
-            }
+            },
+
+            ...tQG.update
+        };
+
+        this.select = {
+            // TO-DO
+            ...tQG.select
+        };
+
+        this.delete = {
+            // TO-DO
+            ...tQG.delete
         }
     }
 }

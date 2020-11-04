@@ -8,5 +8,5 @@ export default interface ISubjectGet{
 
     createdAt?: () => Promise<Date>,
     updatedAt?: () => Promise<Date | null>,
-    date?: () => Promise<string>
+    data?: () => Promise<string | null>
 }

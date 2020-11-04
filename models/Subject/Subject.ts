@@ -13,6 +13,8 @@ import subjectFiller from "./SubjectFiller";
 import ISubjectGet from "./ISubjectGet";
 import ISubjectSet from "./ISubjectSet";
 import ISubjectSearch from "./ISubjectSearch";
+import ISubjectInput from "./ISubjectInput";
+import {AfterInsertHook, BeforeInsertHook, BeforeUpdateHook, AfterUpdateHook} from "./hooks";
 
 const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
@@ -39,16 +41,19 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
         public get:ISubjectGet;
         public set:ISubjectSet;
-        public search:ISubjectSearch<Subject>;
 
         public execute:myExecute;
         private manyExecute:multipleExecute;
 
-        private changes:{fields:ISubjectUpdateFieldObj, dataObj:ISubjectUpdateDataObj};
+        protected changes:{fields:ISubjectUpdateFieldObj, dataObj:ISubjectUpdateDataObj};
 
-        private decoratorFillers:subjectFiller[];
+        public decoratorFillers:subjectFiller[];
+        public beforeUpdateHooks:BeforeUpdateHook<Subject>[];
+        public afterUpdateHooks:AfterUpdateHook<Subject>[];
+        public beforeInsertHooks:BeforeInsertHook<Subject>[];
+        public afterInsertHooks:AfterInsertHook<Subject>[];
 
-        private constructor(row:SubjectDBRow){
+        protected constructor(row:SubjectDBRow){
             this.id = row.id;
             this.fill(row);
 
@@ -61,6 +66,10 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
             }
 
             this.decoratorFillers = [];
+            this.beforeUpdateHooks = [];
+            this.afterUpdateHooks = [];
+            this.beforeInsertHooks = [];
+            this.afterInsertHooks = [];
 
             this.get = {
 
@@ -160,54 +169,62 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
             };
 
-            this.search = {
-
-                byAccount :async (account:string):Promise<Subject> => {
-                    const allReadableFields:Field[] = Object.values(Subject.queryGenerator.readableFields);
-        
-                    const query:IQuery = Subject.queryGenerator.select.byAccount({
-                        account,
-                        limit : 1
-                    },...allReadableFields);
-        
-                    return this.execute(query)
-                    .then(function captureTheFirstResult(result:SubjectDBRow[]):SubjectDBRow{
-                        if(result[0] !== undefined){
-                            return result[0];
-                        }else{
-                            throw new Error("Row Doesn't Exist");
-                        }
-                    })
-                    .then(function constructTheObject(row:SubjectDBRow):Subject{
-                        return new Subject(row);
-                    })
-                },
-
-                byId : async (id:number):Promise<Subject> =>{
-                    const allReadableFields:Field[] = Object.values(Subject.queryGenerator.readableFields);
-        
-                    const query:IQuery = Subject.queryGenerator.select.byId({
-                        id,
-                        limit : 1
-                    },...allReadableFields);
-        
-                    return this.execute(query)
-                    .then(function captureTheFirstResult(result:SubjectDBRow[]):SubjectDBRow{
-                        if(result[0] !== undefined){
-                            return result[0];
-                        }else{
-                            throw new Error("Row Doesn't Exist");
-                        }
-                    })
-                    .then(function constructTheObject(row:SubjectDBRow):Subject{
-                        return new Subject(row);
-                    })
-                }
-            };
         }
 
+        public static search:ISubjectSearch<Subject> = {
+
+            byAccount :async (account:string):Promise<Subject> => {
+                const allReadableFields:Field[] = Object.values(Subject.queryGenerator.readableFields);
+    
+                const query:IQuery = Subject.queryGenerator.select.byAccount({
+                    account,
+                    limit : 1
+                },...allReadableFields);
+    
+                return Subject.execute(query)
+                .then(function captureTheFirstResult(result:SubjectDBRow[]):SubjectDBRow{
+                    if(result[0] !== undefined){
+                        return result[0];
+                    }else{
+                        throw new Error("Row Doesn't Exist");
+                    }
+                })
+                .then(function constructTheObject(row:SubjectDBRow):Subject{
+                    // let subject:Subject = new Subject(row);
+                    // if(stored.createdAt) subject = new CreatedAt(subject,row);
+                    return new Subject(row);
+                })
+            },
+
+            byId : async (id:number):Promise<Subject> =>{
+                const allReadableFields:Field[] = Object.values(Subject.queryGenerator.readableFields);
+    
+                const query:IQuery = Subject.queryGenerator.select.byId({
+                    id,
+                    limit : 1
+                },...allReadableFields);
+    
+                return Subject.execute(query)
+                .then(function captureTheFirstResult(result:SubjectDBRow[]):SubjectDBRow{
+                    if(result[0] !== undefined){
+                        return result[0];
+                    }else{
+                        throw new Error("Row Doesn't Exist");
+                    }
+                })
+                .then(function constructTheObject(row:SubjectDBRow):Subject{
+                    return new Subject(row);
+                })
+            },
+
+            // createdAfterDate : !stored.createdAt ? undefined : async (date:Date):Promise<Subject[]> => {
+            //     const allReadableFields:Field[] = Object.values(Subject.queryGenerator.readableFields);
+
+            // }
+        };
+
         public async saveChanges():Promise<void>{
-            const id:number = await this.id;
+            const id:number = this.id;
 
             const changedFields:Field[] = Object.values(this.changes.fields);
             const queryData:ISubjectUpdateDataObj = this.changes.dataObj;
@@ -238,7 +255,7 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
             this._enableMfa = row.enableMfa;
         }
 
-        private async populateFromDB():Promise<void>{
+        protected async populateFromDB():Promise<void>{
             const subject:Subject = this;
             const id:number = this.id;
 
@@ -270,6 +287,117 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
             await this.execute(query);
         }
 
+        // public static async insertSubject(subjectInput:ISubjectInput):Promise<Subject>{
+
+        // }
+
+    }
+
+    class CreatedAt extends Subject{
+
+        private _createdAt?:Date;
+
+        public constructor(subject:Subject,row:SubjectDBRow){
+            super(row);
+
+            subject.decoratorFillers.push((row:SubjectDBRow)=>{
+                this._createdAt = row.createdAt;
+            });
+
+            this.get = {
+
+                createdAt : async ():Promise<Date> => {
+                    if(this._createdAt !== undefined){
+                        return this._createdAt
+                    }else{
+                        await this.populateFromDB();
+                        return this._createdAt!;
+                    }
+                },
+
+                ...subject.get
+
+            }
+
+            this.set = {
+
+                ...subject.set
+
+            };
+        }
+
+    }
+
+    class Data extends Subject{
+
+        private _data?:string | null;
+
+        public constructor(subject:Subject,row:SubjectDBRow){
+            super(row);
+
+            subject.decoratorFillers.push((row:SubjectDBRow)=>{
+                this._data = row.data;
+            });
+
+            this.get = {
+
+                data : async ():Promise<string | null> => {
+                    if(this._data !== undefined){
+                        return this._data;
+                    }else{
+                        await this.populateFromDB();
+                        return this._data!;
+                    }
+                },
+
+                ...subject.get
+
+            };
+
+            this.set = {
+
+                data : (data:string | null) => {
+                    this._data = data;
+                    this.changes.fields.data = Subject.queryGenerator.writableFields.data;
+                    this.changes.dataObj.data = data;
+                },
+
+                ...subject.set
+
+            }
+        }
+
+    }
+
+    class UpdatedAt extends Subject{
+
+        private _updatedAt?:Date | null;
+
+        public constructor(subject:Subject,row:SubjectDBRow){
+            super(row);
+
+            subject.decoratorFillers.push((row:SubjectDBRow)=>{
+                this._updatedAt = row.updatedAt;
+            });
+
+            this.get = {
+
+                updatedAt : async ():Promise<Date | null> =>{
+                    if(this._updatedAt !== undefined){
+                        return this._updatedAt;
+                    }else{
+                        await this.populateFromDB();
+                        return this._updatedAt!;
+                    }
+                },
+
+                ...subject.get
+
+            };
+
+            
+
+        }
     }
 
     return Subject;

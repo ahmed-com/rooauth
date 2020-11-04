@@ -16,5 +16,20 @@ export default class Data extends SubjectQG{
         this.fields = {...sQG.fields , data:decoratorField};
         this.readableFields = {...sQG.readableFields , data:decoratorField};
         this.writableFields = {...sQG.writableFields , data:decoratorField};
+
+        this.select = {
+            // TO-DO
+            ...sQG.select
+        };
+
+        this.update = {
+            // TO-DO
+            ...sQG.update
+        };
+
+        this.delete = {
+            // TO-DO
+            ...sQG.delete
+        }
     }
 }
