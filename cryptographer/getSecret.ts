@@ -1,4 +1,3 @@
-import { getSodium } from './index';
 import path from 'path';
 import fs from 'fs';
 import {promisify} from 'util';
