@@ -16,6 +16,7 @@ import ISubjectSearch from "./ISubjectSearch";
 import ISubjectInput from "./ISubjectInput";
 import {AfterInsertHook, BeforeInsertHook, BeforeUpdateHook, AfterUpdateHook} from "./hooks";
 import { exec } from "child_process";
+import { strict } from "assert";
 
 const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
@@ -51,7 +52,6 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
         public decoratorFillers:subjectFiller[];
         public beforeUpdateHooks:BeforeUpdateHook<Subject>[];
         public afterUpdateHooks:AfterUpdateHook<Subject>[];
-        public static beforeInsertHooks:BeforeInsertHook<Subject>[] = []
         public static afterInsertHooks:AfterInsertHook<Subject>[] = [];
 
         protected constructor(row:SubjectDBRow){
@@ -247,11 +247,65 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
                 })
             },
 
-            // createdAfterDate : !stored.createdAt ? undefined : async (date:Date):Promise<Subject[]> => {
-            //     const allReadableFields:Field[] = Object.values(Subject.queryGenerator.readableFields);
+            createdAfterDate : !stored.createdAt ? undefined : async (date:string,limit:number,offset:number):Promise<Subject[]> => {
+                const allReadableFields:Field[] = Object.values(Subject.queryGenerator.readableFields);
+                const query:IQuery = Subject.queryGenerator.select.createdAfterDate!({
+                    date,
+                    limit,
+                    offset,
+                },...allReadableFields);
 
-            // }
+                return Subject.execute(query)
+                .then(async function turnIntoSubjects(result:SubjectDBRow[]):Promise<Subject[]> {
+                    return result.map(row=>{
+                    let subject:Subject = new Subject(row);
+
+                    if(stored.createdAt) subject = new CreatedAt(subject,row);
+                    if(stored.updatedAt) subject = new UpdatedAt(subject,row);
+                    if(stored.data)      subject = new Data(subject,row);
+                    
+                    return subject;
+                    })
+                })
+            },
+
+            createdBeforeDate : !stored.createdAt ? undefined : async (date:string,limit:number,offset:number):Promise<Subject[]> => {
+                const allReadableFields:Field[] = Object.values(Subject.queryGenerator.readableFields);
+                const query:IQuery = Subject.queryGenerator.select.createdBeforeDate!({
+                    date,
+                    limit,
+                    offset,
+                },...allReadableFields);
+
+                return Subject.execute(query)
+                .then(async function turnIntoSubjects(result:SubjectDBRow[]):Promise<Subject[]> {
+                    return result.map(row=>{
+                    let subject:Subject = new Subject(row);
+
+                    if(stored.createdAt) subject = new CreatedAt(subject,row);
+                    if(stored.updatedAt) subject = new UpdatedAt(subject,row);
+                    if(stored.data)      subject = new Data(subject,row);
+                    
+                    return subject;
+                    })
+                })
+            }
         };
+        
+        public static beforeInsertHooks:BeforeInsertHook<Subject>[] = [
+
+            function initializeInput(input:ISubjectInput) {
+                let newInput:ISubjectInput = input;
+
+                newInput.oldPasswordHash = null;
+                newInput.passwordChangedAt = null;
+                if(stored.updatedAt) newInput.updatedAt = null
+                if(stored.createdAt) newInput.createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+                return newInput;
+            }
+
+        ];
 
         public async saveChanges():Promise<void>{
             const id:number = this.id;
@@ -335,11 +389,13 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
         }
 
         public static async insertSubject(subjectInput:ISubjectInput):Promise<Subject>{
+            let newSubjectInput:ISubjectInput = subjectInput;
+
             Subject.beforeInsertHooks.forEach(hook=>{
-                subjectInput = hook(subjectInput);
+                newSubjectInput = hook(subjectInput);
             });
 
-            const query:IQuery = Subject.queryGenerator.insertSubject(subjectInput);
+            const query:IQuery = Subject.queryGenerator.insertSubject(newSubjectInput);
 
             let subject:Subject;
 
