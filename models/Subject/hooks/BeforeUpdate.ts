@@ -6,6 +6,6 @@ type UpdateData = {
     fields:ISubjectUpdateFieldObj
 }
 
-type BeforeUpdateHook<Subject> = (subject:Subject,updateData:UpdateData) => UpdateData
+type BeforeUpdateHook<Subject> = (subject:Subject,updateData:UpdateData) => Promise<UpdateData>
 
 export default BeforeUpdateHook;

@@ -36,7 +36,7 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
         private _account?:string;
         private _passwordHash?:string;
         private _oldPasswordHash?:string | null;
-        private _passwordChangedAt?:Date | null;
+        private _passwordChangedAt?:string | null;
         private _enableMfa?:boolean;
         private _accountVerified?:boolean;
 
@@ -67,7 +67,33 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
             }
 
             this.decoratorFillers = [];
-            this.beforeUpdateHooks = [];
+            this.beforeUpdateHooks = [
+
+                async function archiveOldPassword(subject,updateData):Promise<{fields:ISubjectUpdateFieldObj,dataObj:ISubjectUpdateDataObj}>{
+                    let newUpdateData:{fields:ISubjectUpdateFieldObj,dataObj:ISubjectUpdateDataObj};
+
+                    if(updateData.dataObj.passwordHash !== undefined){ // password is changed
+                        newUpdateData = {
+                            fields: {
+                                oldPasswordHash: Subject.queryGenerator.writableFields.oldPasswordHash,
+                                passwordChangedAt: Subject.queryGenerator.writableFields.passwordChangedAt,
+                                ...updateData.fields
+                            },
+                            dataObj : {
+                                oldPasswordHash: await subject.get.passwordHash(),
+                                passwordChangedAt : new Date().toISOString().slice(0, 19).replace('T', ' '),
+                                ...updateData.dataObj
+                            }
+                        }
+
+                        return newUpdateData;
+                    }
+
+                    return updateData;
+                }
+
+            ];
+
             this.afterUpdateHooks = [
 
                 (_,_2,_3)=>{
@@ -106,7 +132,7 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
                     }
                 },
 
-                passwordChangedAt : async ():Promise<Date | null> =>{
+                passwordChangedAt : async ():Promise<string | null> =>{
                     if(this._passwordChangedAt !== undefined){
                         return this._passwordChangedAt;
                     }else{
@@ -147,18 +173,6 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
                     this._passwordHash = passwordHash;
                     this.changes.fields.passwordHash = Subject.queryGenerator.writableFields.passwordHash;
                     this.changes.dataObj.passwordHash = passwordHash;
-                },
-
-                passwordChangedAt : (passwordChangedAt:Date | null):void =>{
-                    this._passwordChangedAt = passwordChangedAt;
-                    this.changes.fields.passwordChangedAt = Subject.queryGenerator.writableFields.passwordChangedAt;
-                    this.changes.dataObj.passwordChangedAt = passwordChangedAt;
-                },
-
-                oldPasswordHash : (oldPasswordHash:string | null):void =>{
-                    this._oldPasswordHash = oldPasswordHash;
-                    this.changes.fields.oldPasswordHash = Subject.queryGenerator.writableFields.oldPasswordHash;
-                    this.changes.dataObj.oldPasswordHash = oldPasswordHash;
                 },
 
                 enableMfa : (enableMfa:boolean):void =>{
@@ -250,9 +264,13 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
                 dataObj:this.changes.dataObj
             };
 
-            this.beforeUpdateHooks.forEach(hook=>{
-                updateData = hook(this,updateData);
-            })
+            const hookPromises:Promise<void>[] = this.beforeUpdateHooks.map(hook =>{
+                return (async () => {
+                    updateData = await hook(this,updateData);
+                })();
+            });
+
+            await Promise.all(hookPromises);
 
             const changedFields:Field[] = Object.values(updateData.fields);
             const queryData:ISubjectUpdateDataObj = updateData.dataObj;
@@ -345,7 +363,7 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
     class CreatedAt extends Subject{
 
-        private _createdAt?:Date;
+        private _createdAt?:string;
 
         public constructor(subject:Subject,row:SubjectDBRow){
             super(row);
@@ -356,7 +374,7 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
             this.get = {
 
-                createdAt : async ():Promise<Date> => {
+                createdAt : async ():Promise<string> => {
                     if(this._createdAt !== undefined){
                         return this._createdAt
                     }else{
@@ -431,7 +449,7 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
     class UpdatedAt extends Subject{
 
-        private _updatedAt?:Date | null;
+        private _updatedAt?:string | null;
 
         public constructor(subject:Subject,row:SubjectDBRow){
             super(row);
@@ -442,7 +460,7 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
             this.get = {
 
-                updatedAt : async ():Promise<Date | null> =>{
+                updatedAt : async ():Promise<string | null> =>{
                     if(this._updatedAt !== undefined){
                         return this._updatedAt;
                     }else{

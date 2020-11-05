@@ -4,9 +4,9 @@ export default interface ISubjectInput{
     enableMfa?:boolean,
     accountVerified?:boolean,
     oldPasswordHash?:string | null,
-    passwordChangedAt?:Date | null,
+    passwordChangedAt?:string | null,
 
-    createdAt?:Date,
+    createdAt?:string,
     data?:string | null,
-    updatedAt?:Date | null
+    updatedAt?:string | null
 }

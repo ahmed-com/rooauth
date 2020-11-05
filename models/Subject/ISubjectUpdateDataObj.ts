@@ -2,10 +2,10 @@ export default interface ISubjectUpdateDataObj{
     account?:string,
     passwordHash?:string,
     oldPasswordHash?:string | null,
-    passwordChangedAt?:Date | null,
+    passwordChangedAt?:string | null,
     enableMfa?:boolean,
     accountVerified?:boolean,
 
     data?:string | null,
-    updatedAt?:Date | null
+    updatedAt?:string | null
 }

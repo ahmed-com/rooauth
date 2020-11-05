@@ -2,11 +2,11 @@ export default interface ISubjectGet{
     account: () => Promise<string>,
     passwordHash: () => Promise<string>,
     oldPasswordHash: () => Promise<string | null>,
-    passwordChangedAt: () => Promise<Date | null>,
+    passwordChangedAt: () => Promise<string | null>,
     enableMfa: () => Promise<boolean>,
     accountVerified: () => Promise<boolean>,
 
-    createdAt?: () => Promise<Date>,
-    updatedAt?: () => Promise<Date | null>,
+    createdAt?: () => Promise<string>,
+    updatedAt?: () => Promise<string | null>,
     data?: () => Promise<string | null>
 }

@@ -4,11 +4,11 @@ export default interface SubjectDBRow{
     account?:string,
     passwordHash?:string,
     oldPasswordHash?:string | null,
-    passwordChangedAt?:Date | null,
+    passwordChangedAt?:string | null,
     enableMfa?:boolean,
     accountVerified?:boolean,
 
-    createdAt?:Date,
+    createdAt?:string,
     data?:string | null,
-    updatedAt?:Date | null
+    updatedAt?:string | null
 }
