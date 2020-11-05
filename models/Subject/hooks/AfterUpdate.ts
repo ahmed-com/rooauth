@@ -7,6 +7,6 @@ type UpdateData = {
     fields:ISubjectUpdateFieldObj
 }
 
-type AfterUpdateHook<Subject> = (subject:Subject,updateData:UpdateData,query:IQuery) => UpdateData
+type AfterUpdateHook<Subject> = (subject:Subject,updateData:UpdateData,query:IQuery) => void
 
 export default AfterUpdateHook;

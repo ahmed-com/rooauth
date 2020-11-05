@@ -15,6 +15,7 @@ import ISubjectSet from "./ISubjectSet";
 import ISubjectSearch from "./ISubjectSearch";
 import ISubjectInput from "./ISubjectInput";
 import {AfterInsertHook, BeforeInsertHook, BeforeUpdateHook, AfterUpdateHook} from "./hooks";
+import { exec } from "child_process";
 
 const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
@@ -50,8 +51,8 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
         public decoratorFillers:subjectFiller[];
         public beforeUpdateHooks:BeforeUpdateHook<Subject>[];
         public afterUpdateHooks:AfterUpdateHook<Subject>[];
-        public beforeInsertHooks:BeforeInsertHook<Subject>[];
-        public afterInsertHooks:AfterInsertHook<Subject>[];
+        public static beforeInsertHooks:BeforeInsertHook<Subject>[] = []
+        public static afterInsertHooks:AfterInsertHook<Subject>[] = [];
 
         protected constructor(row:SubjectDBRow){
             this.id = row.id;
@@ -67,9 +68,14 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
             this.decoratorFillers = [];
             this.beforeUpdateHooks = [];
-            this.afterUpdateHooks = [];
-            this.beforeInsertHooks = [];
-            this.afterInsertHooks = [];
+            this.afterUpdateHooks = [
+
+                (_,_2,_3)=>{
+                    this.changes.dataObj = {};
+                    this.changes.fields = {};
+                }
+
+            ];
 
             this.get = {
 
@@ -190,9 +196,13 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
                     }
                 })
                 .then(function constructTheObject(row:SubjectDBRow):Subject{
-                    // let subject:Subject = new Subject(row);
-                    // if(stored.createdAt) subject = new CreatedAt(subject,row);
-                    return new Subject(row);
+                    let subject:Subject = new Subject(row);
+
+                    if(stored.createdAt) subject = new CreatedAt(subject,row);
+                    if(stored.updatedAt) subject = new UpdatedAt(subject,row);
+                    if(stored.data)      subject = new Data(subject,row);
+
+                    return subject;
                 })
             },
 
@@ -213,7 +223,13 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
                     }
                 })
                 .then(function constructTheObject(row:SubjectDBRow):Subject{
-                    return new Subject(row);
+                    let subject:Subject = new Subject(row);
+
+                    if(stored.createdAt) subject = new CreatedAt(subject,row);
+                    if(stored.updatedAt) subject = new UpdatedAt(subject,row);
+                    if(stored.data)      subject = new Data(subject,row);
+                    
+                    return subject;
                 })
             },
 
@@ -226,8 +242,20 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
         public async saveChanges():Promise<void>{
             const id:number = this.id;
 
-            const changedFields:Field[] = Object.values(this.changes.fields);
-            const queryData:ISubjectUpdateDataObj = this.changes.dataObj;
+            let updateData:{
+                fields:ISubjectUpdateFieldObj,
+                dataObj:ISubjectUpdateDataObj
+            } = {
+                fields:this.changes.fields, 
+                dataObj:this.changes.dataObj
+            };
+
+            this.beforeUpdateHooks.forEach(hook=>{
+                updateData = hook(this,updateData);
+            })
+
+            const changedFields:Field[] = Object.values(updateData.fields);
+            const queryData:ISubjectUpdateDataObj = updateData.dataObj;
 
             const query:IQuery = Subject.queryGenerator.update.byId({
                 id,
@@ -237,8 +265,9 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
             
             return this.execute(query)
             .then(()=>{
-                this.changes.dataObj = {};
-                this.changes.fields = {};
+                this.afterUpdateHooks.forEach(hook=>{
+                    hook(this,updateData,query);
+                });
             });
         }
 
@@ -287,9 +316,30 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
             await this.execute(query);
         }
 
-        // public static async insertSubject(subjectInput:ISubjectInput):Promise<Subject>{
+        public static async insertSubject(subjectInput:ISubjectInput):Promise<Subject>{
+            Subject.beforeInsertHooks.forEach(hook=>{
+                subjectInput = hook(subjectInput);
+            });
 
-        // }
+            const query:IQuery = Subject.queryGenerator.insertSubject(subjectInput);
+
+            let subject:Subject;
+
+            return Subject.manyExecute(async function insertSubjectIntoDB(execute){
+                const defaultExecute:myExecute = Subject.execute;
+                Subject.execute = execute
+
+                const {insertId} = await Subject.execute(query);
+                subject = await Subject.search.byId(insertId);
+
+                Subject.execute = defaultExecute;
+
+                Subject.afterInsertHooks.forEach(hook=>{
+                    hook(subject);
+                });
+            })
+            .then(()=>subject);
+        }
 
     }
 
@@ -324,6 +374,11 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
                 ...subject.set
 
             };
+            
+            this.afterUpdateHooks = [...subject.afterUpdateHooks];
+            
+            this.beforeUpdateHooks = [...subject.beforeUpdateHooks];
+
         }
 
     }
@@ -365,6 +420,11 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
                 ...subject.set
 
             }
+
+            this.afterUpdateHooks = [...subject.afterUpdateHooks];
+            
+            this.beforeUpdateHooks = [...subject.beforeUpdateHooks];
+
         }
 
     }
@@ -394,8 +454,10 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
                 ...subject.get
 
             };
-
             
+            this.afterUpdateHooks = [...subject.afterUpdateHooks];
+            
+            this.beforeUpdateHooks = [...subject.beforeUpdateHooks];
 
         }
     }
