@@ -15,8 +15,8 @@ import ISubjectSet from "./ISubjectSet";
 import ISubjectSearch from "./ISubjectSearch";
 import ISubjectInput from "./ISubjectInput";
 import {AfterInsertHook, BeforeInsertHook, BeforeUpdateHook, AfterUpdateHook} from "./hooks";
-import { exec } from "child_process";
-import { strict } from "assert";
+
+type UpdateData = {fields:ISubjectUpdateFieldObj, dataObj:ISubjectUpdateDataObj};
 
 const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
@@ -47,7 +47,7 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
         public execute:myExecute;
         private manyExecute:multipleExecute;
 
-        protected changes:{fields:ISubjectUpdateFieldObj, dataObj:ISubjectUpdateDataObj};
+        protected changes:UpdateData;
 
         public decoratorFillers:subjectFiller[];
         public beforeUpdateHooks:BeforeUpdateHook<Subject>[];
@@ -69,8 +69,8 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
             this.decoratorFillers = [];
             this.beforeUpdateHooks = [
 
-                async function archiveOldPassword(subject,updateData):Promise<{fields:ISubjectUpdateFieldObj,dataObj:ISubjectUpdateDataObj}>{
-                    let newUpdateData:{fields:ISubjectUpdateFieldObj,dataObj:ISubjectUpdateDataObj};
+                async function archiveOldPassword(subject:Subject,updateData:UpdateData):Promise<UpdateData>{
+                    let newUpdateData:UpdateData;
 
                     if(updateData.dataObj.passwordHash !== undefined){ // password is changed
                         newUpdateData = {
@@ -310,10 +310,7 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
         public async saveChanges():Promise<void>{
             const id:number = this.id;
 
-            let updateData:{
-                fields:ISubjectUpdateFieldObj,
-                dataObj:ISubjectUpdateDataObj
-            } = {
+            let updateData:UpdateData = {
                 fields:this.changes.fields, 
                 dataObj:this.changes.dataObj
             };
@@ -451,7 +448,16 @@ const subjectFactory = async (tenent:Tenent):Promise<any> =>{
             
             this.afterUpdateHooks = [...subject.afterUpdateHooks];
             
-            this.beforeUpdateHooks = [...subject.beforeUpdateHooks];
+            this.beforeUpdateHooks = [
+
+                async function addUpdatedAt(subject:Subject,updateData:UpdateData):Promise<UpdateData> {
+                    let newUpdateData:UpdateData = updateData;
+                    newUpdateData.dataObj.updatedAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                    newUpdateData.fields.updatedAt = Subject.queryGenerator.writableFields.updatedAt;
+                    return newUpdateData;
+                }
+
+            ];
 
         }
 
