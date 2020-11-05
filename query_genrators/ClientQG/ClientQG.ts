@@ -19,18 +19,18 @@ export default class ClientQG{
             updateValue : ':clientId'
         },
 
-        clientSecret : {
-            name : 'clientSecret',
-            definetion : 'clientSecret VARCHAR(255) NOT NULL',
-            insertionValue : ':clientId',
-            updateValue : ':clientId'
+        clientSecretHash : {
+            name : 'clientSecretHash',
+            definetion : 'clientSecretHash VARCHAR(255) NOT NULL',
+            insertionValue : ':clientSecretHash',
+            updateValue : ':clientSecretHash'
         },
 
-        userId : {
-            name : 'userId',
-            definetion : 'userId INTEGER UNSIGNED NOT NULL',
-            insertionValue : ':userId',
-            updateValue : ':userId'
+        details : {
+            name : 'details',
+            definetion : 'details VARCHAR(255) UNSIGNED NULL',
+            insertionValue : ':details',
+            updateValue : ':details'
         },
 
         tenentId : {
@@ -47,9 +47,8 @@ export default class ClientQG{
     };
 
     static writableFields = {
-        clientSecret : ClientQG.fields.clientSecret,
-        userId : ClientQG.fields.userId,
-        tenentId : ClientQG.fields.tenentId
+        clientSecretHash : ClientQG.fields.clientSecretHash,
+        details : ClientQG.fields.details
     };
 
     static select:IClientSelectionCollection = {
@@ -76,14 +75,6 @@ export default class ClientQG{
             const paginationStr:string = pagination(queryData);
             const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
             return {queryStr , queryData };
-        },
-
-        byUserId : (queryData:{userId:number, limit?:number, offset?:number},...fields:Field[]):IQuery=>{
-            const condition:string = 'userId = :userId';
-            const tableName:string = `clients`;
-            const paginationStr:string = pagination(queryData);
-            const queryStr:string = constructSelect(fields,tableName,condition,paginationStr);
-            return {queryStr , queryData }
         }
 
     }
@@ -106,13 +97,6 @@ export default class ClientQG{
 
         byTenentId : (queryData:{tenentId:number},...fields:Field[]):IQuery => {
             const condition:string = ' tenentId = :tenentId ';
-            const tableName:string = 'clients';
-            const queryStr:string = constructUpdate(fields,tableName,condition);
-            return {queryStr , queryData };
-        },
-
-        byUserId : (queryData:{userId:number},...fields:Field[]) => {
-            const condition:string = ' userId = :userId ';
             const tableName:string = 'clients';
             const queryStr:string = constructUpdate(fields,tableName,condition);
             return {queryStr , queryData };
@@ -144,14 +128,6 @@ export default class ClientQG{
             const paginationStr:string = pagination(queryData);
             const queryStr:string = constructDelete(tableName,condition,paginationStr);
             return {queryStr , queryData};
-        },
-
-        byUserId : (queryData:{userId:number, limit?:number, offset?:number}):IQuery => {
-            const condition:string = 'userId = :userId';
-            const tableName:string = 'clients';
-            const paginationStr:string = pagination(queryData);
-            const queryStr:string = constructDelete(tableName,condition,paginationStr);
-            return {queryStr , queryData };
         }
 
     }
@@ -170,6 +146,12 @@ export default class ClientQG{
     public static insertClient(queryData:object):IQuery{
         const allFields:Field[] = Object.values(ClientQG.fields);
         const queryStr:string = insertString (allFields,`clients`);
+
+        return {queryStr , queryData };
+    }
+
+    public doExist(queryData:{clientId:number}):IQuery{
+        const queryStr:string = `SELECT EXISTS( SELECT clientId FROM clients WHERE clientId = :clientId LIMIT 1 ) AS bool;`
 
         return {queryStr , queryData };
     }

@@ -299,7 +299,7 @@ export default class TenentQG {
     }
 
     public doExist(queryData:{tenentId:number}):IQuery{
-        const queryStr:string = `SELECT EXISTS( SELECT tenentId FROM tenents WHERE tenentId = :tenentId LIMIT 1 ) AS exists;`
+        const queryStr:string = `SELECT EXISTS( SELECT tenentId FROM tenents WHERE tenentId = :tenentId LIMIT 1 ) AS bool;`
 
         return {queryStr , queryData };
     }

@@ -6,7 +6,5 @@ type SelectionMethod = (queryData:any,...fields:Field[])=>IQuery;
 export default interface IClientSelectionCollection{
     all :SelectionMethod,
     byClientId:SelectionMethod,
-    byTenentId:SelectionMethod,
-    byUserId:SelectionMethod
-
+    byTenentId:SelectionMethod
 }

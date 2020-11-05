@@ -147,186 +147,145 @@ export default class Tenent{
                 throw new Error("Row Doesn't Exist");
             }
         })
-        .then(function storeTheRowAndReturnTheVariable(row:TenentDBRow){
+        .then(function storeTheRow(row:TenentDBRow){
             tenent.fill(row);
         });
     }
     
-    public get subjectSchema():Promise<SubjectSchema | null>{
+    public async getSubjectSchema():Promise<SubjectSchema | null>{
         if(this._subjectSchema !== undefined){
             return Promise.resolve(this._subjectSchema);
         }else{
-            return this.populateFromDB()
-            .then(()=>{
-                return this._subjectSchema!
-            });
+            await this.populateFromDB()
+            return this._subjectSchema!;
         }
     }
 
-    public set subjectSchema(schema:Promise<SubjectSchema | null>){
-        schema
-        .then(schema=>{
-            this._subjectSchema = schema;
-            this.changes.fields.subjectSchema = Tenent.queryGenerator.writableFields.subjectSchema;
-            this.changes.dataObj.subjectSchema = JSON.stringify(schema);
-        });
+    public set subjectSchema(schema:SubjectSchema | null){
+        this._subjectSchema = schema;
+        this.changes.fields.subjectSchema = Tenent.queryGenerator.writableFields.subjectSchema;
+        this.changes.dataObj.subjectSchema = JSON.stringify(schema);
     }
 
-    public get mfaDefault():Promise<boolean>{
+    public async getMfaDefault():Promise<boolean>{
         if(this._mfaDefault !== undefined){
             return Promise.resolve(this._mfaDefault);
         }else{
-            return this.populateFromDB()
-            .then(()=>{
-                return this._mfaDefault!
-            })
+            await this.populateFromDB()
+            return this._mfaDefault!;
         }
     }
 
-    public set mfaDefault(mfaDefault:Promise<boolean>){
-        mfaDefault
-        .then(mfaDefault=>{
-            this._mfaDefault = mfaDefault
-            this.changes.fields.mfaDefault = Tenent.queryGenerator.writableFields.mfaDefault;
-            this.changes.dataObj.mfaDefault = mfaDefault;
-        });
+    public set mfaDefault(mfaDefault:boolean){
+        this._mfaDefault = mfaDefault
+        this.changes.fields.mfaDefault = Tenent.queryGenerator.writableFields.mfaDefault;
+        this.changes.dataObj.mfaDefault = mfaDefault;
     }
 
-    public get mfaMethod():Promise<MfaMethod>{
+    public async getMfaMethod():Promise<MfaMethod>{
         if(this._mfaMethod !== undefined){
             return Promise.resolve(this._mfaMethod);
         }else{
-            return this.populateFromDB()
-            .then(()=>{
-                return this._mfaMethod!
-            })
+            await this.populateFromDB()
+            return this._mfaMethod!;
         }
     }
 
-    public set mfaMethod(mfaMethod:Promise<MfaMethod>){
-        mfaMethod
-        .then(mfaMethod=>{
-            this._mfaMethod = mfaMethod;
-            this.changes.fields.mfaMethod = Tenent.queryGenerator.writableFields.mfaMethod;
+    public set mfaMethod(mfaMethod:MfaMethod){
+        this._mfaMethod = mfaMethod;
+        this.changes.fields.mfaMethod = Tenent.queryGenerator.writableFields.mfaMethod;
             
-            if(mfaMethod === MfaMethod.email) this.changes.dataObj.mfaMethod = "email";
-        })
+        if(mfaMethod === MfaMethod.email) this.changes.dataObj.mfaMethod = "email";
     }
     
-    public get publicKey():Promise<string>{
+    public async getPublicKey():Promise<string>{
         if(this._publicKey !== undefined){
             return Promise.resolve(this._publicKey);
         }else{
-            return this.populateFromDB()
-            .then(()=>{
-                return this._publicKey!
-            });
+            await this.populateFromDB()
+            return this._publicKey!;
         }
     }
 
-    public set publicKey(publicKey:Promise<string>){
-        publicKey
-        .then(publicKey=>{
-            this._publicKey = publicKey;
-            this.changes.fields.publicKey = Tenent.queryGenerator.writableFields.publicKey;
-            this.changes.dataObj.publicKey = publicKey;
-        });
+    public set publicKey(publicKey:string){
+        this._publicKey = publicKey;
+        this.changes.fields.publicKey = Tenent.queryGenerator.writableFields.publicKey;
+        this.changes.dataObj.publicKey = publicKey;
     }
     
-    public get hasIpWhiteList():Promise<boolean>{
+    public async getHasIpWhiteList():Promise<boolean>{
         if(this._hasIpWhiteList !== undefined){
             return Promise.resolve(this._hasIpWhiteList);
         }else{
-            return this.populateFromDB()
-            .then(()=>{
-                return this._hasIpWhiteList!
-            });
+            await this.populateFromDB()
+            return this._hasIpWhiteList!;
         }
     }
 
-    public set hasIpWhiteList(has:Promise<boolean>){
-        has
-        .then(has=>{
-            this._hasIpWhiteList = has;
-            this.changes.fields.hasIpWhiteList = Tenent.queryGenerator.writableFields.hasIpWhiteList;
-            this.changes.dataObj.hasIpWhiteList = has;
-        });
+    public set hasIpWhiteList(has:boolean){
+        this._hasIpWhiteList = has;
+        this.changes.fields.hasIpWhiteList = Tenent.queryGenerator.writableFields.hasIpWhiteList;
+        this.changes.dataObj.hasIpWhiteList = has;
     }
     
-    public get maxSession():Promise<number>{
+    public async getMaxSession():Promise<number>{
         if(this._maxSession !== undefined){
             return Promise.resolve(this._maxSession);
         }else{
-            return this.populateFromDB()
-            .then(()=>{
-                return this._maxSession!
-            });
+            await this.populateFromDB()
+            return this._maxSession!;
         }
     }
 
-    public set maxSession(ms:Promise<number>){
-        ms
-        .then(ms=>{
-            this._maxSession = ms;
-            this.changes.fields.maxSession = Tenent.queryGenerator.fields.maxSession;
-            this.changes.dataObj.maxSession = ms;
-        });
+    public set maxSession(ms:number){
+        this._maxSession = ms;
+        this.changes.fields.maxSession = Tenent.queryGenerator.fields.maxSession;
+        this.changes.dataObj.maxSession = ms;
     }
     
-    public get ipRateLimit():Promise<number>{
+    public async getIpRateLimit():Promise<number>{
         if(this._ipRateLimit !== undefined){
             return Promise.resolve(this._ipRateLimit);
         }else{
-            return this.populateFromDB()
-            .then(()=>{
-                return this._ipRateLimit!
-            });
+            await this.populateFromDB()
+            return this._ipRateLimit!;
         }
     }
 
-    public set ipRateLimit(irl:Promise<number>){
-        irl
-        .then(irl=>{
-            this._ipRateLimit = irl;
-            this.changes.fields.ipRateLimit = Tenent.queryGenerator.writableFields.ipRateLimit;
-            this.changes.dataObj.ipRateLimit = irl;
-        })
+    public set ipRateLimit(irl:number){
+        this._ipRateLimit = irl;
+        this.changes.fields.ipRateLimit = Tenent.queryGenerator.writableFields.ipRateLimit;
+        this.changes.dataObj.ipRateLimit = irl;
     }
     
-    public get tenentStore():Promise<ITenentStore>{
+    public async getTenentStore():Promise<ITenentStore>{
         if(this._tenentStore !== undefined){
             return Promise.resolve(this._tenentStore);
         }else{
-            return this.populateFromDB()
-            .then(()=>{
-                return this._tenentStore!
-            });
+            await this.populateFromDB()
+            return this._tenentStore!;
         }
     }
 
     // Notice that there is no setter function beacuse you can never update the tenent data store after initialization
 
-    private get privateKeyCipher():Promise<string>{
+    private async getPrivateKeyCipher():Promise<string>{
         if(this._privateKeyCipher !== undefined){
             return Promise.resolve(this._privateKeyCipher);
         }else{
-            return this.populateFromDB()
-            .then(()=>{
-                return this._privateKeyCipher!
-            });
+            await this.populateFromDB()
+            return this._privateKeyCipher!;
         }
     }
 
-    public get privateKey():Promise<string>{
+    public async getPrivateKey():Promise<string>{
         if(this._privateKey !== undefined){
             return Promise.resolve(this._privateKey);
         }else{
-            return this.privateKeyCipher
-                .then(decryptCipher)
-                .then(privateKey=>{
-                    this._privateKey = privateKey
-                    return privateKey;
-                });
+            const privateKeyEncrypted:string = await this.getPrivateKeyCipher();
+            const privateKey:string = await decryptCipher(privateKeyEncrypted);
+            this._privateKey = privateKey
+            return privateKey;
         }
     }
 
@@ -422,7 +381,7 @@ export default class Tenent{
 
             const defaultExecute:myExecute = tenent.execute;
             tenent.execute = execute;
-            const _tenentStore:ITenentStore = await tenent.tenentStore;
+            const _tenentStore:ITenentStore = await tenent.getTenentStore();
             tenent.execute = defaultExecute;
 
             const tenentQG:TenentQG = new Tenent.queryGenerator(insertId);
