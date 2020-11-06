@@ -22,10 +22,10 @@ export default class Verified extends TokenQG{
         this.writableFields = {...tQG.writableFields , verified:decoratorField};
 
         this.update ={
-            byVerified : (queryData:{verified:boolean},...fields:Field[]):IQuery =>{
-                const condition:string = "verified = :verified";
+            byJti : (queryData:{jti:number,verified:boolean},verifiedField:Field):IQuery =>{
+                const condition:string = "jti = :jti";
                 const tableName:string = `tno${this.id}tokens`
-                const queryStr:string = constructUpdate(fields,tableName,condition);
+                const queryStr:string = constructUpdate([verifiedField],tableName,condition);
                 return {queryStr , queryData};
             },
 

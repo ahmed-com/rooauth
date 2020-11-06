@@ -6,5 +6,5 @@ type UpdateMethod = (queryData:any,...fields:Field[])=>IQuery;
 export default interface TokenUpdateCollection{
     
     // decorator fields
-    byVerified?:UpdateMethod
+    byJti?:UpdateMethod
 }

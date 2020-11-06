@@ -10,5 +10,6 @@
         "storeCreatedAt": false,
         "storeUpdatedAt" : false,
         "mfaMethod" : "email"
-    }
+    },
+    "refreshTokenExpirationPeriod" : 31536000000
 }
