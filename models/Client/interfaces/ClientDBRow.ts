@@ -1,6 +1,6 @@
 export default interface ClientDBRow{
-    clientId?:number,
+    clientId:number,
     clientSecretHash?:string,
     details?:string | null,
-    tenentId:number
+    tenentId?:number
 }

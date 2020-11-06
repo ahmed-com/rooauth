@@ -152,4 +152,17 @@ export default class Client{
 
         return new Client(insertId);
     }
+
+    public static async searchClientsByTenentId(tenentId:number,limit:number,offset:number):Promise<Client[]>{
+        const clientIdField:Field = Client.queryGenerator.readableFields.clientId
+        const query:IQuery = Client.queryGenerator.select.byTenentId({
+            tenentId,
+            limit,
+            offset
+        },clientIdField);
+
+        const result:ClientDBRow[] = await Client.execute(query);
+        const clients:Client[] = result.map(row=> new Client(row.clientId));
+        return clients;
+    }
 }
