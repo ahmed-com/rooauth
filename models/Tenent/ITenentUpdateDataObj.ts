@@ -6,5 +6,6 @@ export default interface ITenentUpdateDataObj{
     publicKey?:string,
     hasIpWhiteList?:boolean,
     maxSession?:number,
-    ipRateLimit?:number
+    ipRateLimit?:number,
+    isLocked?:boolean
 }

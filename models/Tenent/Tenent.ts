@@ -37,6 +37,7 @@ export default class Tenent{
     private _tenentStore?:ITenentStore;
     private _maxSession?:number;
     private _ipRateLimit?:number;
+    private _isLocked?:boolean;
 
     public execute:myExecute;
     private manyExecute:multipleExecute;
@@ -150,6 +151,21 @@ export default class Tenent{
         .then(function storeTheRow(row:TenentDBRow){
             tenent.fill(row);
         });
+    }
+
+    public async getIsLocked():Promise<boolean>{
+        if(this._isLocked !== undefined){
+            return Promise.resolve(this._isLocked);
+        }else{
+            await this.populateFromDB();
+            return this._isLocked!;
+        }
+    }
+
+    public set isLocked(isLocked:boolean){
+        this._isLocked = isLocked;
+        this.changes.fields.isLocked = Tenent.queryGenerator.writableFields.isLocked;
+        this.changes.dataObj.isLocked = isLocked;
     }
     
     public async getSubjectSchema():Promise<SubjectSchema | null>{

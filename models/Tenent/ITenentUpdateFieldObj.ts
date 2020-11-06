@@ -8,5 +8,6 @@ export default interface ITenentUpdateFieldObj{
     publicKey?:Field,
     hasIpWhiteList?:Field,
     maxSession?:Field,
-    ipRateLimit?:Field
+    ipRateLimit?:Field,
+    isLocked?:Field
 }

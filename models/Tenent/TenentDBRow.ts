@@ -14,5 +14,6 @@ export default interface TenentDBRow{
     storeSubjectCreatedAt?:boolean,
     storeSubjectUpdatedAt?:boolean,
     maxSession?:number,
-    ipRateLimit?:number
+    ipRateLimit?:number,
+    isLocked?:boolean
 }

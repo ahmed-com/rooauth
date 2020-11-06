@@ -165,6 +165,14 @@ export default class TenentQG {
             definetion : `ipRateLimit INTEGER NOT NULL DEFAULT ${TenentQG.defaultIpRateLimit}`,
             insertionValue : `IFNULL(:ipRateLimit,${TenentQG.defaultIpRateLimit})`,
             updateValue : ':ipRateLimit'
+        },
+
+        isLocked : {
+            name : 'isLocked',
+            default : 'FALSE',
+            insertionValue : `IFNULL(:isLocked,FALSE)`,
+            definetion : 'isLocked BOOLEAN NOT NULL DEFAULT FALSE',
+            updateValue : ':isLocked'
         }
 
     }

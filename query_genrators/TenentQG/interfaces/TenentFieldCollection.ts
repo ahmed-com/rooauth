@@ -14,5 +14,6 @@ export default interface TenentFieldCollection{
     storeSubjectCreatedAt:Field,
     storeSubjectUpdatedAt:Field,
     maxSession:Field,
-    ipRateLimit:Field
+    ipRateLimit:Field,
+    isLocked : Field
 }
