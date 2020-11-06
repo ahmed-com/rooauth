@@ -21,7 +21,7 @@ type UpdateData = {fields:ISubjectUpdateFieldObj, dataObj:ISubjectUpdateDataObj}
 const subjectFactory = async (tenent:Tenent):Promise<any> =>{
 
     const tenentId:number = tenent.tenentId;
-    const tenentStore:ITenentStore = await tenent.tenentStore;
+    const tenentStore:ITenentStore = await tenent.getTenentStore();
     const tenentQG:TenentQG = new Tenent.queryGenerator(tenentId);
     const subjectQG:SubjectQG = tenentQG.getSubjectQG(tenentStore);
     const stored = tenentStore.storeForSubject;

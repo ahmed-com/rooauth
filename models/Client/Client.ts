@@ -115,4 +115,41 @@ export default class Client{
         this.changes.fields.clientSecretHash = Client.queryGenerator.writableFields.clientSecretHash;
         this.changes.dataObj.clientSecretHash = clientSecretHash;
     }
+
+    public async getDetails():Promise<string | null>{
+        if(this._details !== undefined){
+            return Promise.resolve(this._details);
+        }else{
+            await this.populateFromDB();
+            return this._details!;
+        }
+    }
+
+    public set details(details:string){
+        this._details = details;
+        this.changes.fields.details = Client.queryGenerator.writableFields.details;
+        this.changes.dataObj.details = details
+    }
+
+    public async getTenentId():Promise<number>{
+        if(this._tenentId !== undefined){
+            return Promise.resolve(this._tenentId);
+        }else{
+            await this.populateFromDB();
+            return this._tenentId!;
+        }
+    }
+
+    public static async insertClient(clientId:number,clientSecretHash:string,details:string | null,tenentId:number):Promise<Client>{
+        const query:IQuery = Client.queryGenerator.insertClient({
+            clientId,
+            clientSecretHash,
+            details,
+            tenentId
+        });
+
+        const {insertId} = await Client.execute(query)
+
+        return new Client(insertId);
+    }
 }
