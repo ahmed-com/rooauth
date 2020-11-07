@@ -19,6 +19,9 @@ import { encryptText , decryptCipher, generateKeys } from '../../cryptographer';
 import pool from "../../services/db/db";
 import {multipleExecute, myExecute} from '../../services/db/types';
 
+import subjectFactory from '../Subject/Subject';
+import tokenFactory from '../Token/Token';
+
 export default class Tenent{
 
     public static queryGenerator = TenentQG;
@@ -54,6 +57,16 @@ export default class Tenent{
             dataObj : {}
         }
     };
+
+    public getSubjectClass(){
+        const tenent:Tenent = this;
+        return subjectFactory(tenent);
+    }
+
+    public getTokenClass(){
+        const tenent:Tenent = this;
+        return tokenFactory(tenent);
+    }
 
     public async saveChanges():Promise<void>{
         const tenentId:number = this.tenentId;
