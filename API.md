@@ -163,7 +163,7 @@
     response: []
 # auth:
 ## decrypt code
-    url: /auth/code/:tenentId/:clientId
+    url: /auth/:tenentId/:clientId/code
     method: GET
     query: {
         code: string "string"
@@ -177,14 +177,14 @@
         }
     ]
 ## request password reset token
-    url: /auth/password/:tenentId/:clientId
+    url: /auth/:tenentId/:clientId/password
     method: POST
     body: {
         account: string
     }
     response: []
 ## request password reset page
-    url: /auth/password/:tenentId/:clientId/
+    url: /auth/:tenentId/:clientId/password
     method: GET
     query: {
         token: string "JWT"
@@ -192,7 +192,7 @@
     header: null
     response: "a rendered HTML page that'll use the token to reset the PW"
 ## reset password 
-    url: /auth/password/:tenentId/:clientId
+    url: /auth/:tenentId/:clientId/password
     method: PATCH
     body: {
         newPassword: string
@@ -202,7 +202,7 @@
     }
     response: []
 ## verify login
-    url: /auth/verify/:tenentId/:clientId
+    url: /auth/:tenentId/:clientId/verify
     method: GET
     query:{
         token : string "verification code"
