@@ -1,5 +1,13 @@
-export * as authRouter from './auth';
-export * as tenentRouter from './tenent';
-export * as clientRouter from './client';
-export * as subjectRouter from './subject';
-export * as logRouter from './log';
+import authRouter from './auth';
+import tenentRouter from './tenent';
+import clientRouter from './client';
+import subjectRouter from './subject';
+import logRouter from './log';
+
+export {
+    authRouter,
+    tenentRouter,
+    clientRouter,
+    subjectRouter,
+    logRouter
+}
