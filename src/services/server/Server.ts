@@ -1,6 +1,10 @@
 import express, { Application, Request, Response, NextFunction } from 'express'
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import isAdmin from './middlewares/isAdmin';
+import isIpWhiteListed from './middlewares/isIpWhiteListed';
+import extractTenent from './middlewares/extractTenent';
+import path from 'path';
 import {
     authRouter,
     tenentRouter,
@@ -8,7 +12,6 @@ import {
     subjectRouter,
     logRouter
 } from './routes'
-import isAdmin from './middlewares/isAdmin';
 
 export default class Server{
 
@@ -44,16 +47,22 @@ export default class Server{
     }
 
     private handleRoutes(): void{
-        this._app.use('/tenent',isAdmin,tenentRouter);
-        this._app.use('/client/:tenentId',isAdmin,clientRouter);
-        this._app.use('/subject/:tenentId/:clientId',subjectRouter);
-        this._app.use('/log/:tenentId/:clientId',logRouter);
-        this._app.use('/auth/:tenentId/:clientId',authRouter);
+        this._app.use('/tenent',isAdmin,extractTenent,isIpWhiteListed,tenentRouter);
+        this._app.use('/client/:tenentId',isAdmin,extractTenent,isIpWhiteListed,clientRouter);
+        this._app.use('/subject/:tenentId/:clientId',extractTenent,subjectRouter);
+        this._app.use('/log/:tenentId/:clientId',extractTenent,logRouter);
+        this._app.use('/auth/:tenentId/:clientId',extractTenent,authRouter);
     }
 
     private initializeMiddleWares(): void{
+        this._app.use(express.static(path.join(__dirname,'/../../public')));
+
+        this._app.set('views',path.join(__dirname,'/../../views'));
+        this._app.set('view engine', 'ejs');
+
         this._app.use(bodyParser.json());
         this._app.use(cors());
+
         // TO-DO : rate limiting
         // TO-DO : request size limitation
         // TO-DO : multer ??
